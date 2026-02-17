@@ -1,0 +1,404 @@
+{
+  "_comment": "GestureSelect Master Config v1.0 \u2014 single source of truth for Python pipeline + Chrome Extension",
+  "version": "1.0",
+  "settings": {
+    "_comment": "Global runtime preferences. Written by the extension UI, read by both pipeline and extension.",
+    "camera_index": 0,
+    "camera_width": 1280,
+    "camera_height": 720,
+    "preferred_hand": "right",
+    "max_num_hands": 2,
+    "detection_confidence": 0.8,
+    "tracking_confidence": 0.7,
+    "model_complexity": 1,
+    "gesture_buffer_size": 5,
+    "dynamic_buffer_size": 5,
+    "position_history_size": 25,
+    "sequence_timeout_seconds": 3.0,
+    "max_sequence_length": 5,
+    "scroll_speed": 3,
+    "scroll_smoothing": true,
+    "cursor_sensitivity": 1.0,
+    "ghost_cursor_color": "#FBBF24",
+    "ghost_cursor_active_color": "#3B82F6",
+    "websocket_port": 8765,
+    "websocket_host": "localhost",
+    "two_hand_multiplier": {
+      "enabled": true,
+      "activation": "hold",
+      "hold_duration_seconds": 0.5,
+      "max_fingers": 5,
+      "max_product": 25
+    }
+  },
+  "actions": {
+    "_comment": "Master list of all things the system can do. Gestures get bound to action IDs. 'repeatable' = fires continuously while gesture is held. 'layer' = which Chrome API handles it.",
+    "tab_switch_left": {
+      "label": "Switch Tab Left",
+      "layer": "tabs",
+      "repeatable": false,
+      "description": "Swipe left \u2014 finger count on swiping hand = tabs jumped (1\u20135). Two-hand mode: hold multiplier hand still for 0.5s first, then swipe. Tabs jumped = multiplier_fingers \u00d7 swipe_fingers (max 25).",
+      "modifier": "finger_count",
+      "max_modifier": 5,
+      "two_hand": {
+        "enabled": true,
+        "multiplier_activation": "hold",
+        "hold_duration_seconds": 0.5,
+        "max_product": 25
+      }
+    },
+    "tab_switch_right": {
+      "label": "Switch Tab Right",
+      "layer": "tabs",
+      "repeatable": false,
+      "description": "Swipe right \u2014 finger count on swiping hand = tabs jumped (1\u20135). Two-hand mode: hold multiplier hand still for 0.5s first, then swipe. Tabs jumped = multiplier_fingers \u00d7 swipe_fingers (max 25).",
+      "modifier": "finger_count",
+      "max_modifier": 5,
+      "two_hand": {
+        "enabled": true,
+        "multiplier_activation": "hold",
+        "hold_duration_seconds": 0.5,
+        "max_product": 25
+      }
+    },
+    "tab_new": {
+      "label": "New Tab",
+      "layer": "tabs",
+      "repeatable": false,
+      "description": "Open a new blank tab"
+    },
+    "tab_close": {
+      "label": "Close Current Tab",
+      "layer": "tabs",
+      "repeatable": false,
+      "description": "Close the active tab"
+    },
+    "tab_reload_prev": {
+      "label": "Reopen Last Closed Tab",
+      "layer": "tabs",
+      "repeatable": false,
+      "description": "Reopen the most recently closed tab (Ctrl+Shift+T)"
+    },
+    "window_minimize": {
+      "label": "Minimize Window",
+      "layer": "window",
+      "repeatable": false,
+      "description": "Minimize the Chrome window"
+    },
+    "window_maximize": {
+      "label": "Maximize / Restore",
+      "layer": "window",
+      "repeatable": false,
+      "description": "Toggle maximize state of Chrome window"
+    },
+    "scroll_up": {
+      "label": "Scroll Up",
+      "layer": "page",
+      "repeatable": true,
+      "description": "Fires every frame while gesture is held. Speed = settings.scroll_speed x 20 px/tick."
+    },
+    "scroll_down": {
+      "label": "Scroll Down",
+      "layer": "page",
+      "repeatable": true,
+      "description": "Fires every frame while gesture is held. Speed = settings.scroll_speed x 20 px/tick."
+    },
+    "page_back": {
+      "label": "Go Back",
+      "layer": "page",
+      "repeatable": false,
+      "description": "Browser back button"
+    },
+    "page_forward": {
+      "label": "Go Forward",
+      "layer": "page",
+      "repeatable": false,
+      "description": "Browser forward button"
+    },
+    "page_reload": {
+      "label": "Reload Page",
+      "layer": "page",
+      "repeatable": false,
+      "description": "Reload the current page"
+    },
+    "cursor_init": {
+      "label": "Initialize Ghost Cursor",
+      "layer": "cursor",
+      "repeatable": false,
+      "description": "Toggle the ghost cursor overlay on the active tab"
+    },
+    "cursor_select_start": {
+      "label": "Begin Screen Selection",
+      "layer": "cursor",
+      "repeatable": false,
+      "description": "Anchor the start point of a screen region selection"
+    },
+    "cursor_select_confirm": {
+      "label": "Send Selection to Gemini",
+      "layer": "cursor",
+      "repeatable": false,
+      "description": "Screenshot the selected region and open in Google Gemini"
+    },
+    "none": {
+      "label": "Unassigned",
+      "layer": null,
+      "repeatable": false,
+      "description": "No action \u2014 gesture is recognised but ignored"
+    }
+  },
+  "gestures": {
+    "_comment": "Built-in gesture library. IDs must exactly match the string values returned by detect_static_gesture() and detect_dynamic_gesture() in the Python pipeline. 'deletable: false' = can be disabled but not removed from config.",
+    "FIST": {
+      "label": "Fist",
+      "description": "All fingers curled into a closed fist",
+      "type": "static",
+      "hand": "any",
+      "landmarks_rule": "all_fingers_curled",
+      "enabled": true,
+      "deletable": false
+    },
+    "PALM": {
+      "label": "Open Palm",
+      "description": "All five fingers fully extended",
+      "type": "static",
+      "hand": "any",
+      "landmarks_rule": "all_fingers_extended",
+      "enabled": true,
+      "deletable": false
+    },
+    "THUMBS_UP": {
+      "label": "Thumbs Up",
+      "description": "Only the thumb is extended",
+      "type": "static",
+      "hand": "any",
+      "landmarks_rule": "only_thumb_extended",
+      "enabled": true,
+      "deletable": false
+    },
+    "PEACE": {
+      "label": "Peace / Victory",
+      "description": "Index and middle fingers extended and separated",
+      "type": "static",
+      "hand": "any",
+      "landmarks_rule": "index_middle_extended_separated",
+      "enabled": true,
+      "deletable": false
+    },
+    "OK": {
+      "label": "OK",
+      "description": "Thumb and index touching, other three fingers extended",
+      "type": "static",
+      "hand": "any",
+      "landmarks_rule": "thumb_index_pinch_three_extended",
+      "enabled": true,
+      "deletable": false
+    },
+    "UP": {
+      "label": "Point Up",
+      "description": "Index extended pointing upward",
+      "type": "static",
+      "hand": "any",
+      "landmarks_rule": "index_pointing_up",
+      "enabled": true,
+      "deletable": false
+    },
+    "DOWN": {
+      "label": "Point Down",
+      "description": "Index extended pointing downward",
+      "type": "static",
+      "hand": "any",
+      "landmarks_rule": "index_pointing_down",
+      "enabled": true,
+      "deletable": false
+    },
+    "LEFT": {
+      "label": "Point Left",
+      "description": "Index extended pointing left",
+      "type": "static",
+      "hand": "any",
+      "landmarks_rule": "index_pointing_left",
+      "enabled": true,
+      "deletable": false
+    },
+    "RIGHT": {
+      "label": "Point Right",
+      "description": "Index extended pointing right",
+      "type": "static",
+      "hand": "any",
+      "landmarks_rule": "index_pointing_right",
+      "enabled": true,
+      "deletable": false
+    },
+    "SWIPE_LEFT": {
+      "label": "Swipe Left",
+      "description": "Hand moves left with straightness > 0.7, distance > 0.20",
+      "type": "dynamic",
+      "hand": "any",
+      "motion_rule": {
+        "axis": "x",
+        "direction": -1,
+        "velocity_threshold": 0.2,
+        "straightness_threshold": 0.7
+      },
+      "enabled": true,
+      "deletable": false
+    },
+    "SWIPE_RIGHT": {
+      "label": "Swipe Right",
+      "description": "Hand moves right with straightness > 0.7, distance > 0.20",
+      "type": "dynamic",
+      "hand": "any",
+      "motion_rule": {
+        "axis": "x",
+        "direction": 1,
+        "velocity_threshold": 0.2,
+        "straightness_threshold": 0.7
+      },
+      "enabled": true,
+      "deletable": false
+    },
+    "SWIPE_UP": {
+      "label": "Swipe Up",
+      "description": "Hand moves up with straightness > 0.7, distance > 0.20",
+      "type": "dynamic",
+      "hand": "any",
+      "motion_rule": {
+        "axis": "y",
+        "direction": -1,
+        "velocity_threshold": 0.2,
+        "straightness_threshold": 0.7
+      },
+      "enabled": true,
+      "deletable": false
+    },
+    "SWIPE_DOWN": {
+      "label": "Swipe Down",
+      "description": "Hand moves down with straightness > 0.7, distance > 0.20",
+      "type": "dynamic",
+      "hand": "any",
+      "motion_rule": {
+        "axis": "y",
+        "direction": 1,
+        "velocity_threshold": 0.2,
+        "straightness_threshold": 0.7
+      },
+      "enabled": true,
+      "deletable": false
+    },
+    "WAVE": {
+      "label": "Wave",
+      "description": "Hand oscillates left-right with >= 4 direction changes",
+      "type": "dynamic",
+      "hand": "any",
+      "motion_rule": {
+        "type": "oscillation",
+        "min_direction_changes": 4,
+        "min_x_variance": 0.004
+      },
+      "enabled": true,
+      "deletable": false
+    },
+    "UNLOCK": {
+      "label": "Unlock Combo",
+      "description": "Two-hand combo: Left PEACE + Right OK",
+      "type": "combo",
+      "hand": "both",
+      "combo_rule": {
+        "left": "PEACE",
+        "right": "OK"
+      },
+      "enabled": true,
+      "deletable": false
+    },
+    "SELECT": {
+      "label": "Select Combo",
+      "description": "Two-hand combo: Left PALM + Right FIST",
+      "type": "combo",
+      "hand": "both",
+      "combo_rule": {
+        "left": "PALM",
+        "right": "FIST"
+      },
+      "enabled": true,
+      "deletable": false
+    },
+    "HIGH_FIVE": {
+      "label": "High Five",
+      "description": "Two-hand combo: Both PALM simultaneously",
+      "type": "combo",
+      "hand": "both",
+      "combo_rule": {
+        "left": "PALM",
+        "right": "PALM"
+      },
+      "enabled": true,
+      "deletable": false
+    }
+  },
+  "bindings": {
+    "_comment": "User-editable mapping. gesture_id \u2192 action_id. One gesture maps to exactly one action. To unassign a gesture set it to 'none'.",
+    "SWIPE_LEFT": "tab_switch_left",
+    "SWIPE_RIGHT": "tab_switch_right",
+    "SWIPE_UP": "scroll_up",
+    "SWIPE_DOWN": "scroll_down",
+    "PALM": "window_maximize",
+    "FIST": "window_minimize",
+    "THUMBS_UP": "tab_new",
+    "PEACE": "tab_close",
+    "OK": "cursor_init",
+    "UP": "page_back",
+    "DOWN": "page_forward",
+    "LEFT": "none",
+    "RIGHT": "none",
+    "WAVE": "tab_reload_prev",
+    "UNLOCK": "cursor_select_start",
+    "SELECT": "cursor_select_confirm",
+    "HIGH_FIVE": "page_reload"
+  },
+  "custom_gestures": {
+    "_comment": "User-recorded gestures. All entries have deletable: true. Static gestures: user holds pose for 2s, recorded 5-7 times. Dynamic gestures: user performs motion within 1s, recorded 5-7 times. DTW is run against all samples; closest match within dtw_threshold wins.",
+    "_schema_reference": {
+      "id": "custom_{snake_case_label}",
+      "label": "Human readable name",
+      "type": "static | dynamic",
+      "hand": "left | right | any",
+      "created_at": "ISO 8601 timestamp",
+      "deletable": true,
+      "enabled": true,
+      "recording": {
+        "duration_seconds": "2.0 for static, 1.0 for dynamic",
+        "num_samples": "5 to 7",
+        "capture_fps": 30
+      },
+      "dtw_threshold": "0.0\u20131.0 \u2014 lower = stricter match",
+      "samples": [
+        {
+          "recorded_at": "ISO 8601 timestamp",
+          "landmarks": [
+            "Array of 21 points. Each point is [x, y, z] normalised 0.0\u20131.0",
+            "Static gesture: single frame snapshot (21 \u00d7 3)",
+            "Dynamic gesture: sequence of frames [ frame0_landmarks, frame1_landmarks, ... ]"
+          ]
+        }
+      ]
+    }
+  },
+  "cursor_layer": {
+    "_comment": "Configuration specific to the ghost cursor + Gemini integration flow.",
+    "init_gesture": "OK",
+    "select_start_gesture": "UNLOCK",
+    "select_confirm_gesture": "SELECT",
+    "gemini_endpoint": "https://gemini.google.com/app",
+    "gemini_search_param": "q",
+    "capture_method": "desktopCapture",
+    "ocr_before_send": false,
+    "send_as": "image",
+    "ghost_cursor": {
+      "idle_color": "#FBBF24",
+      "active_color": "#3B82F6",
+      "idle_radius": 18,
+      "active_radius": 14,
+      "smoothing_window": 5
+    }
+  }
+}
