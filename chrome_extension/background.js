@@ -358,6 +358,15 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 console.log('[GestureSelect] Service worker started');
 connect();
 
+chrome.alarms.create('keepAlive', { periodInMinutes: 0.4 });
+chrome.alarms.onAlarm.addListener((alarm) => {
+  if (alarm.name === 'keepAlive') {
+    if (connectionState === 'disconnected') {
+      connect();
+    }
+  }
+});
+
 // Keep service worker alive
 setInterval(() => {
   if (ws?.readyState === WebSocket.OPEN) {

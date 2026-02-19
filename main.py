@@ -58,7 +58,7 @@ def setup_logging(debug: bool = False):
 def parse_args():
     p = argparse.ArgumentParser(description="GestureSelect Pipeline")
     p.add_argument("--config",     default="gestures_config_v2.json",
-                   help="Path to gestures_config.json")
+                   help="Path to gestures_config_v2.json")
     p.add_argument("--no-preview", action="store_true",
                    help="Disable OpenCV window (headless mode)")
     p.add_argument("--debug",      action="store_true",
