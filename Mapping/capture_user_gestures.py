@@ -13,7 +13,6 @@ This script:
 Usage:
     python capture_user_gestures.py
 """
-
 import cv2
 import json
 import logging
