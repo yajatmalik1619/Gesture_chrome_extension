@@ -23,7 +23,7 @@ from dataclasses import dataclass, asdict, field
 from typing import Optional
 
 from pipeline.config_manager import ConfigManager
-from pipeline.gesture_detector import FrameResult, HandResult
+from pipeline.gesture_detector_fixed import FrameResult, HandResult
 from pipeline.dtw_matcher import DTWMatcher
 
 logger = logging.getLogger(__name__)

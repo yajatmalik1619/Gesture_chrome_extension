@@ -4,7 +4,7 @@ main.py
 Entry point for the GestureSelect Python pipeline.
 
 Wires together:
-  ConfigManager → GestureDetector → GestureRouter → WebSocketServer
+  ConfigManager → GestureDetector → GestureRouter → ActionExecutor → WebSocketServer
   + DTWMatcher (custom gestures)
   + Recorder   (custom gesture recording sessions)
 
@@ -19,11 +19,14 @@ The pipeline loop:
   2. GestureDetector processes landmarks → FrameResult
   3. Recorder intercepts frame if a session is active
   4. GestureRouter maps FrameResult → ActionEvents
-  5. WebSocketServer broadcasts each ActionEvent to connected extension clients
-  6. Display annotated preview (unless --no-preview)
+  5. ActionExecutor translates ActionEvents → browser commands
+  6. WebSocketServer broadcasts events + execution results to extension
+  7. Display annotated preview (unless --no-preview)
 """
 
 import argparse
+import asyncio
+import json
 import logging
 import sys
 import time
@@ -31,12 +34,12 @@ import time
 import cv2
 
 from pipeline.config_manager import ConfigManager
-from pipeline.gesture_detector import GestureDetector
+from pipeline.gesture_detector_fixed import GestureDetector
 from pipeline.gesture_router import GestureRouter
 from pipeline.dtw_matcher import DTWMatcher
 from pipeline.websocket_server import WebSocketServer
 from pipeline.recorder import Recorder
-
+from Mapping.action_executor_v2 import ActionExecutor
 
 # ── Logging ───────────────────────────────────────────────────────────────────
 
@@ -76,6 +79,7 @@ def run(args):
     dtw      = DTWMatcher(cfg)
     detector = GestureDetector(cfg)
     router   = GestureRouter(cfg, dtw)
+    executor = ActionExecutor(cfg)        # NEW: translates actions → commands
     recorder = Recorder(cfg, dtw)
     server   = WebSocketServer(cfg)
     server.start()
@@ -111,7 +115,7 @@ def run(args):
                 time.sleep(0.05)
                 continue
 
-            # 1. Detect
+            # 1. Detect gestures
             annotated, frame_result = detector.process_frame(frame)
 
             # 2. Recording session (intercepts frames if active)
@@ -121,17 +125,32 @@ def run(args):
                     # Forward recording progress to the extension UI
                     _broadcast_recording_event(server, rec_event)
 
-            # 3. Route → ActionEvents
+            # 3. Route gestures → ActionEvents
             events = router.route(frame_result)
 
-            # 4. Broadcast events
+            # 4. Execute actions and broadcast results
             for event in events:
+                # Execute the action (translates to browser command)
+                result = executor.execute(event)
+                
+                # Log execution
+                cmd_str = result.command or 'N/A'
                 logger.info(
                     f"→ {event.action_id:25s}  gesture={event.gesture_id:15s} "
-                    f"hand={event.hand:6s}  mag={event.magnitude}  "
-                    f"clients={server.client_count}"
+                    f"hand={event.hand:6s}  cmd={cmd_str:20s}  "
+                    f"success={result.success}  clients={server.client_count}"
                 )
+                
+                # Broadcast ActionEvent (gesture detection info)
                 server.broadcast(event)
+                
+                # Broadcast ExecutionResult (what the extension should do)
+                if result.success and result.command:
+                    payload = json.dumps({"type": "EXECUTION", **result.to_dict()})
+                    if server._loop and server._clients:
+                        asyncio.run_coroutine_threadsafe(
+                            server._broadcast_raw(payload), server._loop
+                        )
 
             # 5. Status heartbeat
             status = "running" if frame_result.hands else "no_hands"
@@ -158,7 +177,13 @@ def run(args):
                     logger.info("Manual config reload triggered.")
                     cfg._load()
                 elif key == ord("c"):
-                    logger.info("Buffers cleared.")
+                    logger.info("Buffers cleared — reset gesture history.")
+                    # Clear detector buffers
+                    for side in ("Left", "Right"):
+                        detector._static_buf[side].clear()
+                        detector._dynamic_buf[side].clear()
+                        detector._pos_history[side].clear()
+                        detector._wrist_history[side].clear()
 
     except KeyboardInterrupt:
         logger.info("Interrupted by user.")
@@ -189,7 +214,6 @@ def _attach_recorder_commands(
     original_handler = server._handle_inbound
 
     async def patched_handler(ws, raw):
-        import json
         try:
             msg = json.loads(raw)
         except Exception:
@@ -203,9 +227,7 @@ def _attach_recorder_commands(
                 gesture_type = msg.get("gesture_type", "static"),
                 preferred_hand = msg.get("hand", "Right").capitalize()
             )
-            import asyncio
-            import json as _json
-            await ws.send(_json.dumps({
+            await ws.send(json.dumps({
                 "type": "ACK",
                 "recording_started": True,
                 "gesture_id": msg.get("gesture_id")
@@ -222,10 +244,8 @@ def _attach_recorder_commands(
 
 def _broadcast_recording_event(server: WebSocketServer, event):
     """Forward a RecordingEvent to all connected clients."""
-    import json
     payload = json.dumps(event.to_dict())
     if server._loop and server._clients:
-        import asyncio
         asyncio.run_coroutine_threadsafe(
             server._broadcast_raw(payload), server._loop
         )

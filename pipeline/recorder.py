@@ -32,7 +32,7 @@ from typing import Optional
 import numpy as np
 
 from pipeline.config_manager import ConfigManager
-from pipeline.gesture_detector import FrameResult
+from pipeline.gesture_detector_fixed import FrameResult
 from pipeline.dtw_matcher import DTWMatcher
 
 logger = logging.getLogger(__name__)
