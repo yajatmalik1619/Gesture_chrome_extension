@@ -218,18 +218,22 @@ class GestureDetector:
         # Static smoothing (majority vote from deque)
         static_gesture = self._smooth_gesture(static_raw, self._static_buf[label])
 
-        # Dynamic – only when no strong static gesture
+        # Dynamic – always track position history and detect motion.
+        # Static gesture does not suppress dynamic detection; swipes happen
+        # regardless of hand pose (e.g. swiping with a fist is valid).
         dynamic_gesture = None
-        if static_gesture in (None, "UNKNOWN", "PALM"):
-            tip = (landmarks[self.MIDDLE_TIP][0], landmarks[self.MIDDLE_TIP][1])
-            self._pos_history[label].append(tip)
-            raw_dyn = self._detect_dynamic(self._pos_history[label])
-            if raw_dyn:
-                self._dynamic_buf[label].append(raw_dyn)
-                if len(self._dynamic_buf[label]) >= 4:
-                    dynamic_gesture = Counter(self._dynamic_buf[label]).most_common(1)[0][0]
+        tip = (landmarks[self.MIDDLE_TIP][0], landmarks[self.MIDDLE_TIP][1])
+        self._pos_history[label].append(tip)
+        raw_dyn = self._detect_dynamic(self._pos_history[label])
+        if raw_dyn:
+            self._dynamic_buf[label].append(raw_dyn)
+            # Require only 2 consistent frames (was 4) to fire dynamic gesture
+            if len(self._dynamic_buf[label]) >= 2:
+                dynamic_gesture = Counter(self._dynamic_buf[label]).most_common(1)[0][0]
         else:
-            self._dynamic_buf[label].clear()
+            # Only clear dynamic buffer if no motion detected
+            if not raw_dyn and len(self._pos_history[label]) >= 20:
+                self._dynamic_buf[label].clear()
 
         return HandResult(
             label=label,
@@ -329,7 +333,7 @@ class GestureDetector:
     # ── Dynamic Gesture Detection ─────────────────────────────────────────
 
     def _detect_dynamic(self, pos_history: deque) -> Optional[str]:
-        if len(pos_history) < 20:
+        if len(pos_history) < 15:
             return None
         positions = list(pos_history)
         dx = positions[-1][0] - positions[0][0]
@@ -342,7 +346,7 @@ class GestureDetector:
         )
         straightness = total / (path + 1e-6)
 
-        if total > 0.20 and straightness > 0.7:
+        if total > 0.12 and straightness > 0.65:
             angle = math.degrees(math.atan2(dy, dx))
             if -45 <= angle < 45:   return "SWIPE_RIGHT"
             if 45 <= angle < 135:   return "SWIPE_DOWN"
