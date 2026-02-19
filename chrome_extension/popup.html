@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GestureSelect</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    body {
+      width: 320px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #0f172a;
+      color: #e2e8f0;
+      padding: 16px;
+    }
+    
+    header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid #334155;
+    }
+    
+    .logo {
+      font-size: 24px;
+    }
+    
+    h1 {
+      font-size: 18px;
+      font-weight: 600;
+    }
+    
+    .status-card {
+      background: #1e293b;
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 12px;
+      border: 1px solid #334155;
+    }
+    
+    .status-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 6px 0;
+    }
+    
+    .status-label {
+      font-size: 13px;
+      color: #94a3b8;
+    }
+    
+    .status-value {
+      font-size: 13px;
+      font-weight: 500;
+    }
+    
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      display: inline-block;
+      margin-right: 6px;
+    }
+    
+    .status-dot.connected { background: #10b981; }
+    .status-dot.connecting { background: #f59e0b; animation: pulse 1.5s infinite; }
+    .status-dot.disconnected { background: #ef4444; }
+    
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+    
+    .gesture-display {
+      background: #1e293b;
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 12px;
+      border: 1px solid #334155;
+      text-align: center;
+    }
+    
+    .gesture-label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #64748b;
+      margin-bottom: 6px;
+    }
+    
+    .gesture-name {
+      font-size: 20px;
+      font-weight: 600;
+      color: #fbbf24;
+      margin-bottom: 4px;
+    }
+    
+    .gesture-action {
+      font-size: 13px;
+      color: #94a3b8;
+    }
+    
+    .gesture-hand {
+      display: inline-block;
+      font-size: 11px;
+      background: #334155;
+      padding: 2px 8px;
+      border-radius: 4px;
+      margin-top: 6px;
+      color: #cbd5e1;
+    }
+    
+    .stats-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+    
+    .stat-box {
+      background: #1e293b;
+      border-radius: 6px;
+      padding: 10px;
+      text-align: center;
+      border: 1px solid #334155;
+    }
+    
+    .stat-value {
+      font-size: 20px;
+      font-weight: 700;
+      color: #3b82f6;
+      margin-bottom: 2px;
+    }
+    
+    .stat-label {
+      font-size: 10px;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    
+    button {
+      width: 100%;
+      padding: 10px;
+      background: #3b82f6;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    
+    button:hover {
+      background: #2563eb;
+    }
+    
+    button:disabled {
+      background: #334155;
+      cursor: not-allowed;
+      opacity: 0.6;
+    }
+    
+    .warning {
+      background: #fef3c7;
+      color: #92400e;
+      padding: 10px;
+      border-radius: 6px;
+      font-size: 12px;
+      margin-bottom: 12px;
+      border: 1px solid #fde047;
+    }
+    
+    .warning strong {
+      display: block;
+      margin-bottom: 4px;
+    }
+    
+    footer {
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid #334155;
+      text-align: center;
+      font-size: 11px;
+      color: #64748b;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo">✋</div>
+    <h1>GestureSelect</h1>
+  </header>
+  
+  <div id="warning" class="warning" style="display: none;">
+    <strong>⚠️ Pipeline Not Running</strong>
+    Start the Python pipeline: <code>python main.py</code>
+  </div>
+  
+  <div class="status-card">
+    <div class="status-row">
+      <div class="status-label">Connection</div>
+      <div class="status-value">
+        <span class="status-dot" id="status-dot"></span>
+        <span id="connection-status">—</span>
+      </div>
+    </div>
+    <div class="status-row">
+      <div class="status-label">WebSocket</div>
+      <div class="status-value" id="ws-url">—</div>
+    </div>
+    <div class="status-row">
+      <div class="status-label">FPS</div>
+      <div class="status-value" id="fps">—</div>
+    </div>
+  </div>
+  
+  <div class="gesture-display" id="gesture-display" style="display: none;">
+    <div class="gesture-label">Last Gesture</div>
+    <div class="gesture-name" id="gesture-name">—</div>
+    <div class="gesture-action" id="gesture-action">—</div>
+    <div class="gesture-hand" id="gesture-hand">—</div>
+  </div>
+  
+  <div class="stats-grid">
+    <div class="stat-box">
+      <div class="stat-value" id="stat-messages">0</div>
+      <div class="stat-label">Messages</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-value" id="stat-commands">0</div>
+      <div class="stat-label">Commands</div>
+    </div>
+  </div>
+  
+  <button id="reconnect-btn">Reconnect</button>
+  
+  <footer>
+    Press keyboard shortcuts or use gestures
+  </footer>
+  
+  <script src="popup.js"></script>
+</body>
+</html>
