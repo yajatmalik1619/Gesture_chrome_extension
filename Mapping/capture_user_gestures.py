@@ -22,8 +22,10 @@ import sys
 from pathlib import Path
 from collections import deque
 
-# Add project root to path
-sys.path.insert(0, str(Path(__file__).parent))
+
+# Add project root (one level up) to Python path
+sys.path.insert(0, str(Path(__file__).parent.parent))
+
 
 from pipeline.config_manager import ConfigManager
 from pipeline.gesture_detector_fixed import GestureDetector
