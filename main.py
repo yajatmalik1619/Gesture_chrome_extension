@@ -14,6 +14,7 @@ Run:
     python main.py --no-preview       # headless mode (no cv2 window)
     python main.py --debug            # verbose logging
 
+    
 The pipeline loop:
   1. Read frame from webcam
   2. GestureDetector processes landmarks FrameResult
@@ -74,7 +75,7 @@ def run(args):
     logger = logging.getLogger("main")
     logger.info("Starting GestureSelect pipelineâ€¦")
 
-    # â”€â”€ Boot components â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    # Boot components
     cfg      = ConfigManager(args.config)
     cfg.start_watching()                  # live-reload on UI config changes
 
@@ -261,7 +262,7 @@ def _broadcast_recording_event(server: WebSocketServer, event):
 
 # Entry Point 
 
-# ── HTTP Control Server ─────────────────────────────────────────────
+#  HTTP Control Server
 
 _pipeline_running = False
 _stop_signal = threading.Event()

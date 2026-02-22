@@ -18,7 +18,7 @@ from pipeline.config_manager import ConfigManager
 logger = logging.getLogger(__name__)
 
 
-# ── Data Classes ──────────────────────────────────────────────────────────
+# Data Classes 
 
 @dataclass
 class HandResult:
