@@ -1,5 +1,6 @@
 """
 main.py
+at this point in time we need to run both main and the extension manually together.
 Entry point for the GestureSelect Python pipeline.
 
 Wires together:
