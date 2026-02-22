@@ -12,13 +12,13 @@
   if (window.__gestureSelectInjected) return;
   window.__gestureSelectInjected = true;
   
-  // ─── State ──────────────────────────────────────────────────────────────────
+  // State 
   
   let scrollInterval = null;
   let textSelectionActive = false;
   let selectionStart = null;
   
-  // ─── Message Handler ────────────────────────────────────────────────────────
+  //  Message Handler 
   
   chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     const { type } = message;
@@ -50,7 +50,7 @@
     return true;
   });
   
-  // ─── Scrolling ──────────────────────────────────────────────────────────────
+  // Scrolling 
   
   function handleScroll(params) {
     const { direction, amount } = params;
@@ -78,7 +78,7 @@
     }
   }
   
-  // ─── Text Selection ─────────────────────────────────────────────────────────
+  // Text Selection
   
   function startTextSelection(params) {
     textSelectionActive = true;
@@ -163,7 +163,7 @@
     }
   }
   
-  // ─── Keyboard Shortcuts ─────────────────────────────────────────────────────
+  // Keyboard Shortcuts 
   
   function simulateKeyboardShortcut(message) {
     const { shortcut, modifiers, key, repeat = 1 } = message;
@@ -187,7 +187,7 @@
     }
   }
   
-  // ─── Cleanup ────────────────────────────────────────────────────────────────
+  //  Cleanup 
   
   window.addEventListener('unload', () => {
     stopScroll();

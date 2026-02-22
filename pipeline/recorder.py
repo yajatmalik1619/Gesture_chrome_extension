@@ -38,7 +38,7 @@ from pipeline.dtw_matcher import DTWMatcher
 logger = logging.getLogger(__name__)
 
 
-# ── Recording Session State Machine ──────────────────────────────────────────
+#Rcording Session State Machine 
 
 class RecordingState(Enum):
     IDLE        = auto()
@@ -63,7 +63,7 @@ class RecordingEvent:
         return {"type": "RECORDING_EVENT", **asdict(self)}
 
 
-# ── Recorder ──────────────────────────────────────────────────────────────────
+# Recorder 
 
 class Recorder:
     # Timing constants
@@ -88,7 +88,7 @@ class Recorder:
         self._last_capture  = 0.0
         self._countdown_val = self.COUNTDOWN_SECONDS
 
-    # ── Session Control ────────────────────────────────────────────────────────
+    # Session Control 
 
     def start_session(
         self,
@@ -130,8 +130,7 @@ class Recorder:
     def is_active(self) -> bool:
         return self._state != RecordingState.IDLE
 
-    # ── Frame Update ───────────────────────────────────────────────────────────
-
+    #  Frame Update 
     def update(self, frame_result: FrameResult) -> Optional[RecordingEvent]:
         """
         Call every frame. Returns a RecordingEvent if something noteworthy
@@ -145,7 +144,7 @@ class Recorder:
 
         now = time.time()
 
-        # ── COUNTDOWN ────────────────────────────────────────────────────────
+        #  COUNTDOWN
         if self._state == RecordingState.COUNTDOWN:
             elapsed  = now - self._state_start
             remaining = self.COUNTDOWN_SECONDS - int(elapsed)
@@ -171,7 +170,7 @@ class Recorder:
                 )
             return None
 
-        # ── CAPTURING ────────────────────────────────────────────────────────
+        #  CAPTURING 
         if self._state == RecordingState.CAPTURING:
             if hand is None:
                 return None   # wait for hand to appear
@@ -185,7 +184,7 @@ class Recorder:
 
             return event
 
-        # ── BETWEEN ──────────────────────────────────────────────────────────
+        #  BETWEEN
         if self._state == RecordingState.BETWEEN:
             elapsed = now - self._state_start
             if elapsed >= self.BETWEEN_REST_SECONDS:
@@ -203,7 +202,7 @@ class Recorder:
 
         return None
 
-    # ── Static Capture ─────────────────────────────────────────────────────────
+    #  Static Capture
 
     def _capture_static(
         self, landmarks: np.ndarray, elapsed: float, now: float
@@ -226,7 +225,7 @@ class Recorder:
 
         return None
 
-    # ── Dynamic Capture ────────────────────────────────────────────────────────
+    #  Dynamic Capture
 
     def _capture_dynamic(
         self, landmarks: np.ndarray, elapsed: float
@@ -245,7 +244,7 @@ class Recorder:
 
         return None
 
-    # ── Sample Saving ──────────────────────────────────────────────────────────
+    # Sample Saving 
 
     def _save_sample(self, sample: dict) -> RecordingEvent:
         self._samples.append(sample)
@@ -302,7 +301,7 @@ class Recorder:
             message=f"Gesture '{self._label}' saved successfully!"
         )
 
-    # ── State Machine ──────────────────────────────────────────────────────────
+    #  State Machine 
 
     def _transition(self, new_state: RecordingState):
         logger.debug(f"Recording: {self._state.name} → {new_state.name}")

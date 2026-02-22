@@ -31,7 +31,7 @@ logger = logging.getLogger(__name__)
 
 CONFIG_PATH = "gestures_config_v2.json"
 
-# ── Colors ─────────────────────────────────────────────────────────────────────
+# Colors
 
 C_RESET  = "\033[0m"
 C_BOLD   = "\033[1m"
@@ -50,7 +50,7 @@ def header(text):
     print(f"{C_BOLD}{C_PURPLE}  {text}{C_RESET}")
     print(f"{C_BOLD}{C_PURPLE}{'─' * 60}{C_RESET}\n")
 
-# ── Capture Session ────────────────────────────────────────────────────────────
+#  Capture Session 
 
 class CaptureSession:
     SAMPLES_NEEDED = 6
@@ -239,7 +239,7 @@ class CaptureSession:
         self.detector.close()
 
 
-# ── CLI ────────────────────────────────────────────────────────────────────────
+# CLI 
 
 def main():
     parser = argparse.ArgumentParser(description="GestureSelect Capture Tool")

@@ -1,10 +1,10 @@
 """
 gesture_router.py
-The brain of the pipeline â€” translates raw FrameResult detections into
+The brain of the pipeline translates raw FrameResult detections into
 structured ActionEvent objects ready for WebSocket emission.
 
 Responsibilities:
-  1. Route built-in gesture IDs â†’ action IDs via bindings config.
+  1. Route built-in gesture IDs action IDs via bindings config.
   2. Run DTW matcher on each frame for custom gesture candidates.
   3. Implement the two-hand multiplier mechanic:
        - Track which hand has been stationary for â‰¥ hold_duration_seconds
@@ -28,7 +28,7 @@ from pipeline.dtw_matcher import DTWMatcher
 logger = logging.getLogger(__name__)
 
 
-# â”€â”€ ActionEvent â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+#  ActionEvent 
 
 @dataclass
 class ActionEvent:
@@ -48,7 +48,7 @@ class ActionEvent:
         return asdict(self)
 
 
-# â”€â”€ Multiplier State â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# ultiplier State
 
 class MultiplierTracker:
     """
@@ -102,7 +102,7 @@ class MultiplierTracker:
             self._multiplier[side] = None
 
 
-# â”€â”€ Gesture Router â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# Gesture Router 
 
 class GestureRouter:
     """
@@ -158,7 +158,7 @@ class GestureRouter:
         self._multiplier_on = mc.get("enabled", True)
         logger.info("GestureRouter refreshed.")
 
-    # â”€â”€ Main Entry â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    # Main Entry 
 
     def route(self, frame_result: FrameResult) -> list[ActionEvent]:
         """
@@ -166,8 +166,8 @@ class GestureRouter:
         """
         events: list[ActionEvent] = []
 
-        # â”€â”€ Update multiplier tracker for all detected hands â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-        # Bug 2 Fix: Push current landmarks into rolling buffer for DTW dynamic matching
+        #  multiplier tracker for all detected hands
+        # Push current landmarks into rolling buffer for DTW dynamic matching
         for label, hr in frame_result.hands.items():
             self._landmark_buf[label].append(hr.landmarks)
 
@@ -175,7 +175,7 @@ class GestureRouter:
             if self._multiplier_on:
                 self._multiplier.update(label, hr.is_stationary, hr.finger_count)
 
-        # â”€â”€ Two-hand combo takes priority â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        # Two-hand combo takes priority 
         if frame_result.combo_gesture:
             event = self._resolve_combo(frame_result)
             if event:
@@ -183,7 +183,7 @@ class GestureRouter:
             # When a combo fires, skip individual hand processing this frame
             return events
 
-        # â”€â”€ Per-hand gestures â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        # Per-hand gestures 
         for label, hr in frame_result.hands.items():
             event = self._resolve_hand(hr, frame_result)
             if event:
@@ -206,7 +206,7 @@ class GestureRouter:
                         meta=secondary_meta,
                     ))
 
-        # â”€â”€ No hands â€” clear multiplier â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        # No hands
         if not frame_result.hands:
             self._multiplier.clear()
             self._last_gesture = {"Left": None, "Right": None, "Both": None}
@@ -214,7 +214,7 @@ class GestureRouter:
 
         return events
 
-    # â”€â”€ Combo Resolution â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    #  Combo Resolution 
 
     def _resolve_combo(self, frame_result: FrameResult) -> Optional[ActionEvent]:
         gid = frame_result.combo_gesture
@@ -239,7 +239,7 @@ class GestureRouter:
             repeatable=self.cfg.is_repeatable(action_id),
         )
 
-    # â”€â”€ Single-Hand Resolution â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    #  Single-Hand Resolution 
 
     def _resolve_hand(self, hr: HandResult, frame: FrameResult) -> Optional[ActionEvent]:
         # Determine the active gesture for this hand (dynamic > static priority)
@@ -279,7 +279,7 @@ class GestureRouter:
         self._last_gesture[hr.label] = gesture_id
         self._last_action[hr.label]  = action_id
 
-        # â”€â”€ Compute magnitude for tab-switching gestures â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        #  Compute magnitude for tab-switching gestures 
         magnitude = 1
         if gesture_id in self.TAB_SWIPE_GESTURES and self.cfg.action_has_modifier(action_id):
             swipe_fingers      = max(1, hr.finger_count)
@@ -289,7 +289,7 @@ class GestureRouter:
                 f"Tab swipe: {hr.label} hand, {swipe_fingers}f Ã— {multiplier_fingers}x = {magnitude} tabs"
             )
 
-        # â”€â”€ Extra metadata for cursor layer â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+        # Extra metadata for cursor layer 
         meta = {}
         # Always include landmark data for cursor gestures and gestures that
         # drive continuous secondary actions (e.g. PEACE drives cursor_move)
@@ -306,7 +306,7 @@ class GestureRouter:
             meta=meta,
         )
 
-    # â”€â”€ Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    # Helpers 
 
     def _get_dynamic_sequence(self, hr: HandResult) -> list:
         """

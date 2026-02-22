@@ -12,8 +12,7 @@ let connectionState = 'disconnected'; // 'connected' | 'disconnected' | 'connect
 let lastGesture = null;
 let stats = { messagesReceived: 0, commandsExecuted: 0, errors: 0 };
 
-// ─── WebSocket Connection ─────────────────────────────────────────────────────
-
+//  WebSocket Connection 
 function connect() {
   if (ws && ws.readyState === WebSocket.OPEN) return;
   
@@ -65,7 +64,7 @@ function connect() {
   }
 }
 
-// ─── Message Router ───────────────────────────────────────────────────────────
+//  Message Router
 
 function handleMessage(data) {
   const type = data.type;
@@ -113,7 +112,7 @@ function handleMessage(data) {
   }
 }
 
-// ─── Command Execution ────────────────────────────────────────────────────────
+//Command Execution
 
 async function executeCommand(exec) {
   const { command, params, action_id } = exec;
@@ -167,7 +166,7 @@ async function executeCommand(exec) {
   }
 }
 
-// ─── Keyboard Shortcuts ───────────────────────────────────────────────────────
+// Keyboard Shortcuts 
 
 async function executeKeyboardShortcut(params) {
   const { shortcut, repeat = 1 } = params;
@@ -211,7 +210,7 @@ async function executeKeyboardShortcut(params) {
   }
 }
 
-// ─── Tab Management ───────────────────────────────────────────────────────────
+//  Tab Management 
 
 async function switchTab(delta) {
   const tabs = await chrome.tabs.query({ currentWindow: true });
@@ -249,7 +248,7 @@ async function refreshPage() {
   if (tab) await chrome.tabs.reload(tab.id);
 }
 
-// ─── Scrolling ────────────────────────────────────────────────────────────────
+// Scrolling 
 
 async function executeScroll(params) {
   await sendToContent({ type: 'SCROLL', ...params });
@@ -259,7 +258,7 @@ async function executeScrollStop() {
   await sendToContent({ type: 'SCROLL_STOP' });
 }
 
-// ─── Window Management ────────────────────────────────────────────────────────
+// Window Management 
 
 async function minimizeWindow() {
   const window = await chrome.windows.getCurrent();
@@ -272,7 +271,7 @@ async function maximizeWindow() {
   await chrome.windows.update(window.id, { state: newState });
 }
 
-// ─── Text Selection & Search ──────────────────────────────────────────────────
+//  Text Selection & Search 
 
 async function searchSelectedText() {
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
@@ -291,7 +290,7 @@ async function searchSelectedText() {
   }
 }
 
-// ─── URL Navigation ───────────────────────────────────────────────────────────
+// URL Navigation 
 
 async function navigateToUrl(params) {
   const { url, new_tab } = params;
@@ -303,7 +302,7 @@ async function navigateToUrl(params) {
   }
 }
 
-// ─── Content Script Bridge ───────────────────────────────────────────────────
+//  Content Script Bridge
 
 async function sendToContent(message) {
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
@@ -323,7 +322,7 @@ async function sendToContent(message) {
   }
 }
 
-// ─── Badge & Status ───────────────────────────────────────────────────────────
+// Badge & Status 
 
 function updateBadge() {
   const colors = {
@@ -342,7 +341,7 @@ function updateBadge() {
   chrome.action.setBadgeText({ text: texts[connectionState] });
 }
 
-// ─── Popup Communication ──────────────────────────────────────────────────────
+//  Popup Communication 
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   // Always return true to keep the message channel open for async responses
@@ -402,7 +401,7 @@ async function handlePopupMessage(message) {
   }
 }
 
-// ─── Initialization ───────────────────────────────────────────────────────────
+// Initialization 
 
 console.log('[GestureSelect] Service worker started');
 connect();
