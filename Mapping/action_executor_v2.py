@@ -1,7 +1,5 @@
 """
-action_executor.py (UPDATED)
-â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-Updated version with:
+action_executor.py 
 1. Index finger (landmark 8) tracking for text selection
 2. Vertical (line-wise) and horizontal (char-wise) text selection
 3. Higher sensitivity for vertical selection
@@ -108,7 +106,7 @@ class ActionExecutor:
                 error=str(e)
             )
 
-    # â”€â”€ System Actions â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    # System Actions 
 
     def _execute_system(self, event: ActionEvent, action_def: dict) -> ExecutionResult:
         """Handle system-level actions like minimize/maximize window."""
@@ -135,7 +133,7 @@ class ActionExecutor:
                 error=f"Unknown system command: {command}"
             )
 
-    # â”€â”€ Keyboard Shortcuts â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    # Keyboard Shortcuts 
 
     def _execute_keyboard(self, event: ActionEvent, action_def: dict) -> ExecutionResult:
         """Execute keyboard shortcuts with OS-specific handling."""
@@ -168,7 +166,7 @@ class ActionExecutor:
             params=params
         )
 
-    # â”€â”€ Scroll Actions â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    #Scroll Actions
 
     def _execute_scroll(self, event: ActionEvent, action_def: dict) -> ExecutionResult:
         """Handle page scrolling."""
@@ -201,11 +199,11 @@ class ActionExecutor:
             params=params
         )
 
-    # â”€â”€ Text Selection Workflow â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    #  Text Selection Workflow 
 
     def _execute_text_selection(self, event: ActionEvent, action_def: dict) -> ExecutionResult:
         """
-        UPDATED: Handle text selection using index finger (landmark 8).
+        Handle text selection using index finger (landmark 8).
         
         - Horizontal movement = character-wise selection
         - Vertical movement = line-wise selection (higher sensitivity)
@@ -336,7 +334,7 @@ class ActionExecutor:
                 error=f"Unknown selection action: {selection_action}"
             )
 
-    # â”€â”€ URL Navigation â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    # URL Navigation 
 
     def _execute_url_navigation(self, event: ActionEvent, action_def: dict) -> ExecutionResult:
         """Navigate to a custom URL (for frequently accessed websites)."""
@@ -365,7 +363,7 @@ class ActionExecutor:
             params=params
         )
 
-    # â”€â”€ Custom Gesture Utilities â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    # Custom Gesture Utilities
 
     def create_custom_url_action(
         self, 
@@ -449,7 +447,7 @@ class ActionExecutor:
         logger.info(f"Rebound action '{action_id}': {old_gesture_id} â†’ {new_gesture_id}")
         return True
 
-    # â”€â”€ State Management â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    # State Management
 
     def reset_text_selection_state(self):
         """Reset text selection state."""
