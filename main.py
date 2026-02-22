@@ -42,7 +42,7 @@ from pipeline.websocket_server import WebSocketServer
 from pipeline.recorder import Recorder
 from Mapping.action_executor_v2 import ActionExecutor
 
-# â”€â”€ Logging â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# Logging
 
 def setup_logging(debug: bool = False):
     level = logging.DEBUG if debug else logging.INFO
