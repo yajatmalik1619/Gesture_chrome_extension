@@ -80,6 +80,19 @@ function handleMessage(data) {
     };
     chrome.storage.local.set({ lastGesture });
     
+    // Check custom gesture mappings
+    chrome.storage.local.get(['customMappings'], (result) => {
+      const mappings = result.customMappings || [];
+      const match = mappings.find(m => m.gestureId === data.gesture_id);
+      if (match) {
+        if (match.mappingType === 'url') {
+          navigateToUrl({ url: match.url, new_tab: match.newTab || false });
+        } else if (match.mappingType === 'shortcut') {
+          executeKeyboardShortcut({ shortcut: match.shortcut });
+        }
+      }
+    });
+    
   } else if (type === 'EXECUTION') {
     // Command to execute
     stats.commandsExecuted++;
@@ -95,7 +108,8 @@ function handleMessage(data) {
     
   } else if (type === 'RECORDING_EVENT') {
     // Custom gesture recording progress
-    chrome.storage.local.set({ recordingEvent: data });
+    const isActive = data.phase !== 'done' && data.phase !== 'cancelled';
+    chrome.storage.local.set({ recordingEvent: data, recordingActive: isActive });
   }
 }
 
@@ -126,14 +140,6 @@ async function executeCommand(exec) {
         
       case 'MAXIMIZE_WINDOW':
         await maximizeWindow();
-        break;
-        
-      case 'CURSOR_ACTIVATE':
-        await sendToContent({ type: 'CURSOR_ACTIVATE', params });
-        break;
-        
-      case 'CURSOR_MOVE':
-        await sendToContent({ type: 'CURSOR_MOVE', params });
         break;
         
       case 'TEXT_SELECT_START':
@@ -339,24 +345,83 @@ function updateBadge() {
 // ─── Popup Communication ──────────────────────────────────────────────────────
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  if (message.type === 'GET_STATUS') {
-    sendResponse({
-      connectionState,
-      stats,
-      lastGesture,
-      wsUrl: WS_URL
-    });
-  } else if (message.type === 'RECONNECT') {
-    connect();
-    sendResponse({ ok: true });
-  }
+  // Always return true to keep the message channel open for async responses
+  handlePopupMessage(message).then(sendResponse).catch(err => {
+    console.error('[GestureSelect] Message handler error:', err);
+    sendResponse({ ok: false, error: err.message });
+  });
   return true;
 });
+
+async function handlePopupMessage(message) {
+  switch (message.type) {
+    case 'GET_STATUS':
+      return { connectionState, stats, lastGesture, wsUrl: WS_URL };
+
+    case 'RECONNECT':
+      connect();
+      return { ok: true };
+
+    case 'START_RECORDING':
+      if (ws && ws.readyState === WebSocket.OPEN) {
+        ws.send(JSON.stringify(message));
+        return { ok: true };
+      }
+      return { ok: false, error: 'Not connected to pipeline' };
+
+    case 'CANCEL_RECORDING':
+      if (ws && ws.readyState === WebSocket.OPEN) {
+        ws.send(JSON.stringify({ type: 'CANCEL_RECORDING' }));
+      }
+      return { ok: true };
+
+    case 'GET_CUSTOM_MAPPINGS': {
+      const result = await chrome.storage.local.get(['customMappings']);
+      return { mappings: result.customMappings || [] };
+    }
+
+    case 'SAVE_CUSTOM_MAPPING': {
+      const result = await chrome.storage.local.get(['customMappings']);
+      const mappings = result.customMappings || [];
+      const idx = mappings.findIndex(m => m.gestureId === message.mapping.gestureId);
+      if (idx >= 0) mappings[idx] = message.mapping;
+      else mappings.push(message.mapping);
+      await chrome.storage.local.set({ customMappings: mappings });
+      return { ok: true };
+    }
+
+    case 'DELETE_CUSTOM_MAPPING': {
+      const result = await chrome.storage.local.get(['customMappings']);
+      const mappings = (result.customMappings || []).filter(m => m.gestureId !== message.gestureId);
+      await chrome.storage.local.set({ customMappings: mappings });
+      return { ok: true };
+    }
+
+    default:
+      return { ok: false, error: `Unknown message type: ${message.type}` };
+  }
+}
 
 // ─── Initialization ───────────────────────────────────────────────────────────
 
 console.log('[GestureSelect] Service worker started');
 connect();
+
+// Check if pipeline is running via HTTP control server
+async function checkPipelineStatus() {
+  try {
+    const resp = await fetch('http://localhost:8766/status');
+    if (resp.ok) {
+      const data = await resp.json();
+      chrome.storage.local.set({ pipelineHttpStatus: data.running ? 'running' : 'stopped' });
+    }
+  } catch {
+    chrome.storage.local.set({ pipelineHttpStatus: 'stopped' });
+  }
+}
+
+checkPipelineStatus();
+setInterval(checkPipelineStatus, 5000);
 
 chrome.alarms.create('keepAlive', { periodInMinutes: 0.4 });
 chrome.alarms.onAlarm.addListener((alarm) => {

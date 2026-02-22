@@ -15,8 +15,6 @@
   // ─── State ──────────────────────────────────────────────────────────────────
   
   let scrollInterval = null;
-  let cursorActive = false;
-  let cursorElement = null;
   let textSelectionActive = false;
   let selectionStart = null;
   
@@ -32,12 +30,6 @@
           break;
         case 'SCROLL_STOP':
           stopScroll();
-          break;
-        case 'CURSOR_ACTIVATE':
-          activateCursor(message.params);
-          break;
-        case 'CURSOR_MOVE':
-          moveCursor(message.params);
           break;
         case 'TEXT_SELECT_START':
           startTextSelection(message.params);
@@ -86,57 +78,6 @@
     }
   }
   
-  // ─── Ghost Cursor ───────────────────────────────────────────────────────────
-  
-  function activateCursor(params) {
-    if (cursorActive) {
-      deactivateCursor();
-      return;
-    }
-    
-    cursorActive = true;
-    
-    // Create cursor element
-    cursorElement = document.createElement('div');
-    cursorElement.id = '__gesture_cursor__';
-    Object.assign(cursorElement.style, {
-      position: 'fixed',
-      width: '20px',
-      height: '20px',
-      borderRadius: '50%',
-      border: '2px solid #fbbf24',
-      backgroundColor: 'rgba(251, 191, 36, 0.2)',
-      pointerEvents: 'none',
-      zIndex: '2147483647',
-      transition: 'all 0.05s ease',
-      left: (params.position.x * window.innerWidth) + 'px',
-      top: (params.position.y * window.innerHeight) + 'px',
-      transform: 'translate(-50%, -50%)'
-    });
-    
-    document.body.appendChild(cursorElement);
-    console.log('[GestureSelect] Cursor activated');
-  }
-  
-  function moveCursor(params) {
-    if (!cursorActive || !cursorElement) return;
-    
-    const x = params.position.x * window.innerWidth;
-    const y = params.position.y * window.innerHeight;
-    
-    cursorElement.style.left = x + 'px';
-    cursorElement.style.top = y + 'px';
-  }
-  
-  function deactivateCursor() {
-    if (cursorElement) {
-      cursorElement.remove();
-      cursorElement = null;
-    }
-    cursorActive = false;
-    console.log('[GestureSelect] Cursor deactivated');
-  }
-  
   // ─── Text Selection ─────────────────────────────────────────────────────────
   
   function startTextSelection(params) {
@@ -145,12 +86,6 @@
     
     // Clear any existing selection
     window.getSelection().removeAllRanges();
-    
-    // Visual feedback
-    if (cursorElement) {
-      cursorElement.style.borderColor = '#3b82f6';
-      cursorElement.style.backgroundColor = 'rgba(59, 130, 246, 0.3)';
-    }
     
     console.log('[GestureSelect] Text selection started');
   }
@@ -257,7 +192,6 @@
   
   window.addEventListener('unload', () => {
     stopScroll();
-    deactivateCursor();
   });
   
   console.log('[GestureSelect] Content script loaded');

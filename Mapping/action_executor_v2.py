@@ -1,6 +1,6 @@
 """
 action_executor.py (UPDATED)
-──────────────────
+â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 Updated version with:
 1. Index finger (landmark 8) tracking for text selection
 2. Vertical (line-wise) and horizontal (char-wise) text selection
@@ -56,12 +56,6 @@ class ActionExecutor:
             "selected_text": "",
             "direction": None  # "horizontal" or "vertical"
         }
-        self._cursor_state = {
-            "active": False,
-            "position": {"x": 0, "y": 0},
-            "last_landmarks": None
-        }
-        
         logger.info(f"ActionExecutor initialized for {self._os_type}")
 
     def _detect_os(self) -> str:
@@ -74,7 +68,7 @@ class ActionExecutor:
         else:
             return "linux"
 
-    # ── Main Execution ────────────────────────────────────────────────────
+    # â”€â”€ Main Execution â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     def execute(self, event: ActionEvent) -> ExecutionResult:
         """Execute an ActionEvent and return the result."""
@@ -96,8 +90,6 @@ class ActionExecutor:
                 return self._execute_keyboard(event, action_def)
             elif action_type == "scroll":
                 return self._execute_scroll(event, action_def)
-            elif action_type == "cursor":
-                return self._execute_cursor(event, action_def)
             elif action_type == "text_selection":
                 return self._execute_text_selection(event, action_def)
             elif action_type == "url_navigation":
@@ -116,7 +108,7 @@ class ActionExecutor:
                 error=str(e)
             )
 
-    # ── System Actions ────────────────────────────────────────────────────
+    # â”€â”€ System Actions â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     def _execute_system(self, event: ActionEvent, action_def: dict) -> ExecutionResult:
         """Handle system-level actions like minimize/maximize window."""
@@ -143,7 +135,7 @@ class ActionExecutor:
                 error=f"Unknown system command: {command}"
             )
 
-    # ── Keyboard Shortcuts ────────────────────────────────────────────────
+    # â”€â”€ Keyboard Shortcuts â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     def _execute_keyboard(self, event: ActionEvent, action_def: dict) -> ExecutionResult:
         """Execute keyboard shortcuts with OS-specific handling."""
@@ -176,7 +168,7 @@ class ActionExecutor:
             params=params
         )
 
-    # ── Scroll Actions ────────────────────────────────────────────────────
+    # â”€â”€ Scroll Actions â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     def _execute_scroll(self, event: ActionEvent, action_def: dict) -> ExecutionResult:
         """Handle page scrolling."""
@@ -209,102 +201,7 @@ class ActionExecutor:
             params=params
         )
 
-    # ── Cursor Control ────────────────────────────────────────────────────
-
-    def _execute_cursor(self, event: ActionEvent, action_def: dict) -> ExecutionResult:
-        """Handle web cursor (ghost cursor) control."""
-        cursor_action = action_def.get("cursor_action")
-        
-        if cursor_action == "activate":
-            self._cursor_state["active"] = True
-            
-            # Initialize cursor position from index finger tip (landmark 8)
-            if "landmarks" in event.meta:
-                landmarks = event.meta["landmarks"]
-                index_tip = landmarks[8]  # Index finger tip
-                self._cursor_state["position"] = {
-                    "x": index_tip[0],
-                    "y": index_tip[1]
-                }
-            
-            return ExecutionResult(
-                success=True,
-                action_id=event.action_id,
-                command="CURSOR_ACTIVATE",
-                params=self._cursor_state["position"]
-            )
-        
-        elif cursor_action == "move":
-            if not self._cursor_state["active"]:
-                return ExecutionResult(
-                    success=False,
-                    action_id=event.action_id,
-                    error="Cursor not active"
-                )
-            
-            # Update cursor position based on index finger movement
-            if "landmarks" in event.meta:
-                landmarks = event.meta["landmarks"]
-                index_tip = landmarks[8]
-                
-                cursor_config = self.cfg.cursor_config
-                smoothing = cursor_config.get("smoothing", 0.7)
-                speed = cursor_config.get("speed_multiplier", 1.5)
-                
-                # Smooth cursor movement
-                new_x = index_tip[0] * speed
-                new_y = index_tip[1] * speed
-                
-                self._cursor_state["position"]["x"] = (
-                    smoothing * self._cursor_state["position"]["x"] + 
-                    (1 - smoothing) * new_x
-                )
-                self._cursor_state["position"]["y"] = (
-                    smoothing * self._cursor_state["position"]["y"] + 
-                    (1 - smoothing) * new_y
-                )
-            
-            return ExecutionResult(
-                success=True,
-                action_id=event.action_id,
-                command="CURSOR_MOVE",
-                params=self._cursor_state["position"]
-            )
-        
-        elif cursor_action == "click":
-            if not self._cursor_state["active"]:
-                return ExecutionResult(
-                    success=False,
-                    action_id=event.action_id,
-                    error="Cursor not active"
-                )
-            
-            # Check if pinch gesture is detected
-            pinch_distance = event.meta.get("pinch_distance", 1.0)
-            pinch_threshold = self.cfg.cursor_config.get("pinch_threshold", 0.05)
-            
-            if pinch_distance < pinch_threshold:
-                return ExecutionResult(
-                    success=True,
-                    action_id=event.action_id,
-                    command="CURSOR_CLICK",
-                    params=self._cursor_state["position"]
-                )
-            
-            return ExecutionResult(
-                success=False,
-                action_id=event.action_id,
-                error="Pinch not detected"
-            )
-        
-        else:
-            return ExecutionResult(
-                success=False,
-                action_id=event.action_id,
-                error=f"Unknown cursor action: {cursor_action}"
-            )
-
-    # ── Text Selection Workflow ───────────────────────────────────────────
+    # â”€â”€ Text Selection Workflow â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     def _execute_text_selection(self, event: ActionEvent, action_def: dict) -> ExecutionResult:
         """
@@ -439,7 +336,7 @@ class ActionExecutor:
                 error=f"Unknown selection action: {selection_action}"
             )
 
-    # ── URL Navigation ────────────────────────────────────────────────────
+    # â”€â”€ URL Navigation â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     def _execute_url_navigation(self, event: ActionEvent, action_def: dict) -> ExecutionResult:
         """Navigate to a custom URL (for frequently accessed websites)."""
@@ -468,7 +365,7 @@ class ActionExecutor:
             params=params
         )
 
-    # ── Custom Gesture Utilities ──────────────────────────────────────────
+    # â”€â”€ Custom Gesture Utilities â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     def create_custom_url_action(
         self, 
@@ -489,7 +386,7 @@ class ActionExecutor:
         self.cfg.set("actions", action_id, action_data, persist=True)
         self.cfg.set_binding(gesture_id, action_id)
         
-        logger.info(f"Created custom URL action: {gesture_id} → {url}")
+        logger.info(f"Created custom URL action: {gesture_id} â†’ {url}")
         return True
 
     def create_custom_shortcut_action(
@@ -515,7 +412,7 @@ class ActionExecutor:
         self.cfg.set("actions", action_id, action_data, persist=True)
         self.cfg.set_binding(gesture_id, action_id)
         
-        logger.info(f"Created custom shortcut action: {gesture_id} → {shortcut}")
+        logger.info(f"Created custom shortcut action: {gesture_id} â†’ {shortcut}")
         return True
 
     def bind_gesture_to_library_shortcut(
@@ -549,18 +446,10 @@ class ActionExecutor:
         self.cfg.set_binding(old_gesture_id, "none")
         self.cfg.set_binding(new_gesture_id, action_id)
         
-        logger.info(f"Rebound action '{action_id}': {old_gesture_id} → {new_gesture_id}")
+        logger.info(f"Rebound action '{action_id}': {old_gesture_id} â†’ {new_gesture_id}")
         return True
 
-    # ── State Management ──────────────────────────────────────────────────
-
-    def reset_cursor_state(self):
-        """Reset cursor state (useful when hand is lost)."""
-        self._cursor_state = {
-            "active": False,
-            "position": {"x": 0, "y": 0},
-            "last_landmarks": None
-        }
+    # â”€â”€ State Management â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     def reset_text_selection_state(self):
         """Reset text selection state."""
@@ -573,9 +462,8 @@ class ActionExecutor:
         }
 
     def get_state(self) -> dict:
-        """Get current state of cursor and text selection."""
+        """Get current action executor state."""
         return {
-            "cursor": self._cursor_state,
             "text_selection": self._text_selection_state,
             "os_type": self._os_type
         }

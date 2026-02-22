@@ -1,24 +1,28 @@
 {
   "manifest_version": 3,
   "name": "GestureSelect",
-  "version": "1.0.0",
-  "description": "Control Chrome with hand gestures via MediaPipe + Python backend",
+  "version": "1.1.0",
+  "description": "Control Chrome with hand gestures. Requires the Python pipeline (main.py) to be running.",
   
   "permissions": [
     "activeTab",
     "tabs",
     "scripting",
     "storage",
-    "system.display"
+    "sessions",
+    "windows",
+    "alarms"
   ],
   
   "host_permissions": [
-    "<all_urls>"
+    "<all_urls>",
+    "http://localhost:8765/*",
+    "http://localhost:8766/*",
+    "ws://localhost:8765/*"
   ],
   
   "background": {
-    "service_worker": "background.js",
-    "type": "module"
+    "service_worker": "background.js"
   },
   
   "content_scripts": [

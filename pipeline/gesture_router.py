@@ -1,6 +1,5 @@
 """
 gesture_router.py
-â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 The brain of the pipeline â€” translates raw FrameResult detections into
 structured ActionEvent objects ready for WebSocket emission.
 
@@ -9,7 +8,7 @@ Responsibilities:
   2. Run DTW matcher on each frame for custom gesture candidates.
   3. Implement the two-hand multiplier mechanic:
        - Track which hand has been stationary for â‰¥ hold_duration_seconds
-       - On swipe detection, compute magnitude = multiplier_fingers Ã— swipe_fingers
+       - On swipe detection, compute magnitude = multiplier_fingers swipe_fingers
        - Cap at max_product (25)
   4. Handle repeatable vs one-shot action emission.
   5. Emit ActionEvents with all metadata (gesture_id, action_id, magnitude, hand, timestamp).

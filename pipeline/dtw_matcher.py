@@ -23,14 +23,18 @@ Usage:
 """
 
 import logging
+import os
+from pathlib import Path
+import sys
+from pathlib import Path
 from typing import Optional
 
 import numpy as np
 
 from pipeline.config_manager import ConfigManager
+sys.path.insert(0, str(Path(__file__).parent.parent))
 
 logger = logging.getLogger(__name__)
-
 
 class DTWMatcher:
     """

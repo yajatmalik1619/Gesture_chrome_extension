@@ -6,244 +6,283 @@
   <title>GestureSelect</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    
-    body {
-      width: 320px;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: #0f172a;
-      color: #e2e8f0;
-      padding: 16px;
+    :root {
+      --bg: #1a0f2e; --surface: #251640; --surface2: #2f1d52;
+      --border: #3d2870; --accent: #7c3aed; --accent2: #a855f7;
+      --accent-dim: rgba(124,58,237,0.15); --text: #e2d9f3;
+      --text-muted: #9d87c2; --text-faint: #5e4d8a;
+      --green: #34d399; --amber: #fbbf24; --red: #f87171;
     }
-    
-    header {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: 16px;
-      padding-bottom: 12px;
-      border-bottom: 1px solid #334155;
-    }
-    
-    .logo {
-      font-size: 24px;
-    }
-    
-    h1 {
-      font-size: 18px;
-      font-weight: 600;
-    }
-    
-    .status-card {
-      background: #1e293b;
-      border-radius: 8px;
-      padding: 12px;
-      margin-bottom: 12px;
-      border: 1px solid #334155;
-    }
-    
-    .status-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 6px 0;
-    }
-    
-    .status-label {
-      font-size: 13px;
-      color: #94a3b8;
-    }
-    
-    .status-value {
-      font-size: 13px;
-      font-weight: 500;
-    }
-    
-    .status-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      display: inline-block;
-      margin-right: 6px;
-    }
-    
-    .status-dot.connected { background: #10b981; }
-    .status-dot.connecting { background: #f59e0b; animation: pulse 1.5s infinite; }
-    .status-dot.disconnected { background: #ef4444; }
-    
-    @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.5; }
-    }
-    
-    .gesture-display {
-      background: #1e293b;
-      border-radius: 8px;
-      padding: 12px;
-      margin-bottom: 12px;
-      border: 1px solid #334155;
-      text-align: center;
-    }
-    
-    .gesture-label {
-      font-size: 11px;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      color: #64748b;
-      margin-bottom: 6px;
-    }
-    
-    .gesture-name {
-      font-size: 20px;
-      font-weight: 600;
-      color: #fbbf24;
-      margin-bottom: 4px;
-    }
-    
-    .gesture-action {
-      font-size: 13px;
-      color: #94a3b8;
-    }
-    
-    .gesture-hand {
-      display: inline-block;
-      font-size: 11px;
-      background: #334155;
-      padding: 2px 8px;
-      border-radius: 4px;
-      margin-top: 6px;
-      color: #cbd5e1;
-    }
-    
-    .stats-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 8px;
-      margin-bottom: 12px;
-    }
-    
-    .stat-box {
-      background: #1e293b;
-      border-radius: 6px;
-      padding: 10px;
-      text-align: center;
-      border: 1px solid #334155;
-    }
-    
-    .stat-value {
-      font-size: 20px;
-      font-weight: 700;
-      color: #3b82f6;
-      margin-bottom: 2px;
-    }
-    
-    .stat-label {
-      font-size: 10px;
-      color: #64748b;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
-    
-    button {
-      width: 100%;
-      padding: 10px;
-      background: #3b82f6;
-      color: white;
-      border: none;
-      border-radius: 6px;
-      font-size: 13px;
-      font-weight: 500;
-      cursor: pointer;
-      transition: background 0.2s;
-    }
-    
-    button:hover {
-      background: #2563eb;
-    }
-    
-    button:disabled {
-      background: #334155;
-      cursor: not-allowed;
-      opacity: 0.6;
-    }
-    
-    .warning {
-      background: #fef3c7;
-      color: #92400e;
-      padding: 10px;
-      border-radius: 6px;
-      font-size: 12px;
-      margin-bottom: 12px;
-      border: 1px solid #fde047;
-    }
-    
-    .warning strong {
-      display: block;
-      margin-bottom: 4px;
-    }
-    
-    footer {
-      margin-top: 12px;
-      padding-top: 12px;
-      border-top: 1px solid #334155;
-      text-align: center;
-      font-size: 11px;
-      color: #64748b;
-    }
+    body { width:360px; min-height:200px; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; background:var(--bg); color:var(--text); font-size:13px; line-height:1.4; }
+    .tabs { display:flex; background:var(--surface); border-bottom:1px solid var(--border); }
+    .tab { flex:1; padding:10px 8px; font-size:12px; font-weight:500; color:var(--text-muted); cursor:pointer; border:none; background:transparent; border-bottom:2px solid transparent; transition:all 0.15s; letter-spacing:0.02em; }
+    .tab.active { color:var(--accent2); border-bottom-color:var(--accent2); }
+    .tab:hover:not(.active) { color:var(--text); background:var(--accent-dim); }
+    .panel { display:none; padding:14px; }
+    .panel.active { display:block; }
+    .status-pill { display:flex; align-items:center; gap:6px; background:var(--surface); border:1px solid var(--border); border-radius:20px; padding:6px 12px; margin-bottom:12px; }
+    .dot { width:7px; height:7px; border-radius:50%; flex-shrink:0; }
+    .dot.connected { background:var(--green); }
+    .dot.connecting { background:var(--amber); animation:blink 1.2s infinite; }
+    .dot.disconnected { background:var(--red); }
+    @keyframes blink { 0%,100%{opacity:1}50%{opacity:0.3} }
+    .status-text { font-size:12px; color:var(--text-muted); flex:1; }
+    .status-text .val { color:var(--text); font-weight:500; }
+    .alert { background:rgba(248,113,113,0.1); border:1px solid rgba(248,113,113,0.3); border-radius:6px; padding:10px 12px; margin-bottom:12px; font-size:12px; color:#fca5a5; display:none; }
+    .alert-title { font-weight:600; margin-bottom:3px; color:var(--red); }
+    .card { background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:12px; margin-bottom:10px; }
+    .card-label { font-size:10px; text-transform:uppercase; letter-spacing:0.08em; color:var(--text-faint); margin-bottom:8px; font-weight:600; }
+    .stats-row { display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; margin-bottom:10px; }
+    .stat { background:var(--surface); border:1px solid var(--border); border-radius:6px; padding:10px 8px; text-align:center; }
+    .stat-num { font-size:18px; font-weight:700; color:var(--accent2); }
+    .stat-label { font-size:10px; color:var(--text-faint); text-transform:uppercase; letter-spacing:0.06em; margin-top:2px; }
+    .gesture-info { display:flex; align-items:center; justify-content:space-between; }
+    .gesture-name { font-size:16px; font-weight:600; color:var(--accent2); }
+    .gesture-action { font-size:12px; color:var(--text-muted); margin-top:2px; }
+    .gesture-hand-badge { background:var(--accent-dim); border:1px solid var(--border); color:var(--accent2); font-size:11px; padding:3px 8px; border-radius:4px; font-weight:500; }
+    .btn { padding:9px 14px; border:none; border-radius:6px; font-size:12px; font-weight:500; cursor:pointer; transition:all 0.15s; display:inline-flex; align-items:center; gap:6px; }
+    .btn-primary { background:var(--accent); color:#fff; width:100%; justify-content:center; }
+    .btn-primary:hover { background:#6d28d9; }
+    .btn-primary:disabled { opacity:0.4; cursor:not-allowed; }
+    .btn-ghost { background:var(--surface2); color:var(--text-muted); border:1px solid var(--border); }
+    .btn-ghost:hover { color:var(--text); background:var(--border); }
+    .btn-danger { background:rgba(248,113,113,0.1); color:var(--red); border:1px solid rgba(248,113,113,0.3); }
+    .btn-danger:hover { background:rgba(248,113,113,0.2); }
+    .btn-sm { padding:5px 10px; font-size:11px; }
+    .section-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; }
+    .section-title { font-size:11px; font-weight:600; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.06em; }
+    .form-group { margin-bottom:10px; }
+    .form-label { display:block; font-size:11px; color:var(--text-muted); margin-bottom:5px; font-weight:500; }
+    .form-input, .form-select { width:100%; background:var(--surface2); border:1px solid var(--border); border-radius:5px; color:var(--text); padding:7px 10px; font-size:12px; font-family:inherit; outline:none; transition:border-color 0.15s; }
+    .form-input:focus, .form-select:focus { border-color:var(--accent); }
+    .form-select option { background:var(--surface2); }
+    .form-row { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+    .toggle-group { display:flex; background:var(--surface2); border:1px solid var(--border); border-radius:5px; overflow:hidden; }
+    .toggle-btn { flex:1; padding:7px; font-size:12px; font-weight:500; background:transparent; border:none; color:var(--text-muted); cursor:pointer; transition:all 0.15s; }
+    .toggle-btn.active { background:var(--accent); color:#fff; }
+    .gesture-list { display:flex; flex-direction:column; gap:6px; }
+    .gesture-item { background:var(--surface2); border:1px solid var(--border); border-radius:6px; padding:10px 12px; display:flex; align-items:center; gap:10px; }
+    .gesture-item-name { flex:1; }
+    .gesture-item-label { font-size:13px; font-weight:500; color:var(--text); }
+    .gesture-item-mapping { font-size:11px; color:var(--text-muted); margin-top:2px; word-break:break-all; }
+    .type-badge { font-size:10px; padding:2px 6px; border-radius:3px; font-weight:600; text-transform:uppercase; letter-spacing:0.04em; flex-shrink:0; }
+    .type-url { background:rgba(124,58,237,0.2); color:var(--accent2); }
+    .type-shortcut { background:rgba(251,191,36,0.15); color:var(--amber); }
+    .record-panel { background:var(--surface2); border:1px solid var(--accent); border-radius:8px; padding:14px; margin-bottom:10px; display:none; }
+    .record-panel.active { display:block; }
+    .record-title { font-size:13px; font-weight:600; color:var(--accent2); margin-bottom:8px; display:flex; align-items:center; gap:8px; }
+    .record-dot { width:8px; height:8px; border-radius:50%; background:var(--red); animation:blink 0.8s infinite; }
+    .progress-bar { height:4px; background:var(--border); border-radius:2px; overflow:hidden; margin-bottom:8px; }
+    .progress-fill { height:100%; background:var(--accent2); border-radius:2px; transition:width 0.3s ease; }
+    .record-message { font-size:13px; color:var(--text); text-align:center; padding:8px; background:var(--accent-dim); border-radius:5px; margin-bottom:8px; }
+    .empty-state { text-align:center; padding:24px 16px; color:var(--text-faint); font-size:12px; }
+    .empty-icon { font-size:24px; margin-bottom:8px; letter-spacing:0.1em; color:var(--text-faint); }
+    .divider { height:1px; background:var(--border); margin:12px 0; }
+    .footer { padding:8px 14px; border-top:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; }
+    .footer-text { font-size:11px; color:var(--text-faint); }
+    .hint { font-size:11px; color:var(--text-faint); margin-top:4px; }
+    .grid-table { display:grid; grid-template-columns:1fr 1fr; gap:0; }
+    .grid-table .cell { font-size:12px; padding:5px 0; border-bottom:1px solid var(--border); }
+    .grid-table .cell:nth-last-child(-n+2) { border-bottom:none; }
+    .cell-key { color:var(--text-muted); font-weight:500; }
+    .cell-val { color:var(--text-faint); }
   </style>
 </head>
 <body>
-  <header>
-    <div class="logo">✋</div>
-    <h1>GestureSelect</h1>
-  </header>
-  
-  <div id="warning" class="warning" style="display: none;">
-    <strong>⚠️ Pipeline Not Running</strong>
-    Start the Python pipeline: <code>python main.py</code>
+
+<div class="tabs">
+  <button class="tab active" data-tab="status">Status</button>
+  <button class="tab" data-tab="gestures">Mappings</button>
+  <button class="tab" data-tab="record">Record</button>
+</div>
+
+<!-- STATUS TAB -->
+<div class="panel active" id="tab-status">
+  <div id="alert" class="alert">
+    <div class="alert-title">Pipeline not running</div>
+    Run: <code style="font-size:11px;color:#fca5a5;">python main.py</code>
   </div>
-  
-  <div class="status-card">
-    <div class="status-row">
-      <div class="status-label">Connection</div>
-      <div class="status-value">
-        <span class="status-dot" id="status-dot"></span>
-        <span id="connection-status">—</span>
+
+  <div class="status-pill">
+    <div class="dot disconnected" id="status-dot"></div>
+    <div class="status-text">
+      <span class="val" id="connection-status">Disconnected</span>
+      &nbsp;<span id="ws-url" style="font-size:11px;color:var(--text-faint);">ws://localhost:8765</span>
+    </div>
+  </div>
+
+  <div class="stats-row">
+    <div class="stat">
+      <div class="stat-num" id="stat-fps">--</div>
+      <div class="stat-label">FPS</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num" id="stat-messages">0</div>
+      <div class="stat-label">Events</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num" id="stat-commands">0</div>
+      <div class="stat-label">Actions</div>
+    </div>
+  </div>
+
+  <div class="card" id="gesture-card" style="display:none;">
+    <div class="card-label">Last Gesture</div>
+    <div class="gesture-info">
+      <div>
+        <div class="gesture-name" id="gesture-name">--</div>
+        <div class="gesture-action" id="gesture-action">--</div>
+      </div>
+      <div class="gesture-hand-badge" id="gesture-hand">--</div>
+    </div>
+  </div>
+
+  <button class="btn btn-ghost" style="width:100%;" id="reconnect-btn">Reconnect</button>
+</div>
+
+<!-- MAPPINGS TAB -->
+<div class="panel" id="tab-gestures">
+  <div class="section-header">
+    <div class="section-title">Custom Gesture Mappings</div>
+    <button class="btn btn-sm btn-primary" id="add-mapping-btn">+ Add</button>
+  </div>
+
+  <div class="card" id="add-form" style="display:none;">
+    <div class="card-label">New Mapping</div>
+
+    <div class="form-group">
+      <label class="form-label">Gesture ID</label>
+      <input class="form-input" id="new-gesture-id" placeholder="e.g. my_custom_wave" />
+      <div class="hint">Matches the ID you set when recording</div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Action Type</label>
+      <div class="toggle-group">
+        <button class="toggle-btn active" data-type="url">Open URL</button>
+        <button class="toggle-btn" data-type="shortcut">Shortcut</button>
       </div>
     </div>
-    <div class="status-row">
-      <div class="status-label">WebSocket</div>
-      <div class="status-value" id="ws-url">—</div>
+
+    <div id="url-fields">
+      <div class="form-group">
+        <label class="form-label">URL</label>
+        <input class="form-input" id="new-url" placeholder="https://..." />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Open in</label>
+        <select class="form-select" id="new-tab-mode">
+          <option value="same">Current tab</option>
+          <option value="new">New tab</option>
+        </select>
+      </div>
     </div>
-    <div class="status-row">
-      <div class="status-label">FPS</div>
-      <div class="status-value" id="fps">—</div>
+
+    <div id="shortcut-fields" style="display:none;">
+      <div class="form-group">
+        <label class="form-label">Shortcut</label>
+        <input class="form-input" id="new-shortcut" placeholder="e.g. ctrl+shift+j" />
+        <div class="hint">Use: ctrl, shift, alt, cmd with +</div>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:8px;margin-top:4px;">
+      <button class="btn btn-ghost btn-sm" id="cancel-form-btn" style="flex:1;">Cancel</button>
+      <button class="btn btn-primary btn-sm" id="save-mapping-btn" style="flex:1;">Save</button>
     </div>
   </div>
-  
-  <div class="gesture-display" id="gesture-display" style="display: none;">
-    <div class="gesture-label">Last Gesture</div>
-    <div class="gesture-name" id="gesture-name">—</div>
-    <div class="gesture-action" id="gesture-action">—</div>
-    <div class="gesture-hand" id="gesture-hand">—</div>
-  </div>
-  
-  <div class="stats-grid">
-    <div class="stat-box">
-      <div class="stat-value" id="stat-messages">0</div>
-      <div class="stat-label">Messages</div>
-    </div>
-    <div class="stat-box">
-      <div class="stat-value" id="stat-commands">0</div>
-      <div class="stat-label">Commands</div>
+
+  <div class="gesture-list" id="gesture-list">
+    <div class="empty-state">
+      <div class="empty-icon">[ _ ]</div>
+      No custom mappings yet.<br>Record a gesture, then map it here.
     </div>
   </div>
-  
-  <button id="reconnect-btn">Reconnect</button>
-  
-  <footer>
-    Press keyboard shortcuts or use gestures
-  </footer>
-  
-  <script src="popup.js"></script>
+</div>
+
+<!-- RECORD TAB -->
+<div class="panel" id="tab-record">
+  <div class="record-panel" id="record-active">
+    <div class="record-title">
+      <div class="record-dot"></div>
+      Recording in progress
+    </div>
+    <div class="record-message" id="record-message">Show your gesture to the camera</div>
+    <div class="progress-bar">
+      <div class="progress-fill" id="record-progress-bar" style="width:0%"></div>
+    </div>
+    <div style="font-size:12px;color:var(--text-muted);margin-bottom:10px;" id="record-progress-text">0 / 6 samples</div>
+    <button class="btn btn-danger btn-sm" style="width:100%;" id="cancel-record-btn">Cancel Recording</button>
+  </div>
+
+  <div id="record-form">
+    <div class="card">
+      <div class="card-label">Capture New Gesture</div>
+
+      <div class="form-group">
+        <label class="form-label">Gesture ID</label>
+        <input class="form-input" id="rec-gesture-id" placeholder="my_gesture_id" />
+        <div class="hint">Lowercase, underscores only. Use this when mapping.</div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Display Label</label>
+        <input class="form-input" id="rec-label" placeholder="My Gesture" />
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Type</label>
+          <select class="form-select" id="rec-type">
+            <option value="static">Static (hold pose)</option>
+            <option value="dynamic">Dynamic (motion)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Hand</label>
+          <select class="form-select" id="rec-hand">
+            <option value="right">Right</option>
+            <option value="left">Left</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="hint" style="margin-bottom:10px;" id="type-hint">
+        Hold a fixed hand pose. 6 samples x 2 seconds each.
+      </div>
+
+      <div id="rec-status" class="alert" style="display:none;"></div>
+
+      <button class="btn btn-primary" id="start-record-btn">Start Recording</button>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="section-title" style="margin-bottom:8px;">Built-in Gesture Reference</div>
+    <div class="card">
+      <div class="grid-table">
+        <div class="cell cell-key">PALM</div><div class="cell cell-val">New Tab</div>
+        <div class="cell cell-key">FIST</div><div class="cell cell-val">Close Tab</div>
+        <div class="cell cell-key">SWIPE_RIGHT</div><div class="cell cell-val">Next Tab</div>
+        <div class="cell cell-key">SWIPE_LEFT</div><div class="cell cell-val">Prev Tab</div>
+        <div class="cell cell-key">SWIPE_UP</div><div class="cell cell-val">Minimize</div>
+        <div class="cell cell-key">SWIPE_DOWN</div><div class="cell cell-val">Maximize</div>
+        <div class="cell cell-key">WAVE</div><div class="cell cell-val">Refresh</div>
+        <div class="cell cell-key">THUMBS_UP</div><div class="cell cell-val">Fullscreen</div>
+        <div class="cell cell-key">PEACE</div><div class="cell cell-val">Go Back</div>
+        <div class="cell cell-key">POINTING_UP</div><div class="cell cell-val">Scroll Up</div>
+        <div class="cell cell-key">POINTING_DOWN</div><div class="cell cell-val">Scroll Down</div>
+        <div class="cell cell-key">TWO_FISTS</div><div class="cell cell-val">Stop Scroll</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="footer">
+  <div class="footer-text">GestureSelect</div>
+  <div class="footer-text" id="footer-status">--</div>
+</div>
+
+<script src="popup.js"></script>
 </body>
 </html>

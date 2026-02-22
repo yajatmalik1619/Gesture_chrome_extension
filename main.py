@@ -1,10 +1,9 @@
 """
 main.py
-───────
 Entry point for the GestureSelect Python pipeline.
 
 Wires together:
-  ConfigManager → GestureDetector → GestureRouter → ActionExecutor → WebSocketServer
+  ConfigManager GestureDetector GestureRouter ActionExecutor WebSocketServer
   + DTWMatcher (custom gestures)
   + Recorder   (custom gesture recording sessions)
 
@@ -16,10 +15,10 @@ Run:
 
 The pipeline loop:
   1. Read frame from webcam
-  2. GestureDetector processes landmarks → FrameResult
+  2. GestureDetector processes landmarks FrameResult
   3. Recorder intercepts frame if a session is active
-  4. GestureRouter maps FrameResult → ActionEvents
-  5. ActionExecutor translates ActionEvents → browser commands
+  4. GestureRouter maps FrameResult ActionEvents
+  5. ActionExecutor translates ActionEvents browser commands
   6. WebSocketServer broadcasts events + execution results to extension
   7. Display annotated preview (unless --no-preview)
 """
@@ -29,7 +28,9 @@ import asyncio
 import json
 import logging
 import sys
+import threading
 import time
+from http.server import BaseHTTPRequestHandler, HTTPServer
 
 import cv2
 
@@ -41,7 +42,7 @@ from pipeline.websocket_server import WebSocketServer
 from pipeline.recorder import Recorder
 from Mapping.action_executor_v2 import ActionExecutor
 
-# ── Logging ───────────────────────────────────────────────────────────────────
+# â”€â”€ Logging â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 def setup_logging(debug: bool = False):
     level = logging.DEBUG if debug else logging.INFO
@@ -52,8 +53,7 @@ def setup_logging(debug: bool = False):
         handlers=[logging.StreamHandler(sys.stdout)]
     )
 
-
-# ── CLI ───────────────────────────────────────────────────────────────────────
+#cli
 
 def parse_args():
     p = argparse.ArgumentParser(description="GestureSelect Pipeline")
@@ -66,29 +66,35 @@ def parse_args():
     return p.parse_args()
 
 
-# ── Main Pipeline Loop ────────────────────────────────────────────────────────
+#Main Pipeline Loop
 
 def run(args):
+    global _pipeline_running
     logger = logging.getLogger("main")
-    logger.info("Starting GestureSelect pipeline…")
+    logger.info("Starting GestureSelect pipelineâ€¦")
 
-    # ── Boot components ───────────────────────────────────────────────────────
+    # â”€â”€ Boot components â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     cfg      = ConfigManager(args.config)
     cfg.start_watching()                  # live-reload on UI config changes
 
     dtw      = DTWMatcher(cfg)
     detector = GestureDetector(cfg)
     router   = GestureRouter(cfg, dtw)
-    executor = ActionExecutor(cfg)        # NEW: translates actions → commands
+    executor = ActionExecutor(cfg)        # NEW: translates actions â†’ commands
     recorder = Recorder(cfg, dtw)
     server   = WebSocketServer(cfg)
     server.start()
+
+    # Start HTTP control server (allows extension to check status)
+    _stop_signal.clear()
+    start_control_server(_stop_signal)
+    _pipeline_running = True
 
     # Attach a recorder reference to the server so inbound WS messages can
     # trigger recording sessions from the UI
     _attach_recorder_commands(server, recorder, cfg)
 
-    # ── Camera setup ──────────────────────────────────────────────────────────
+    # â”€â”€ Camera setup â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     s = cfg.settings
     cam = cv2.VideoCapture(s.get("camera_index", 0))
     cam.set(cv2.CAP_PROP_FRAME_WIDTH,  s.get("camera_width",  1280))
@@ -99,19 +105,19 @@ def run(args):
         sys.exit(1)
 
     logger.info(
-        f"Camera opened: {int(cam.get(cv2.CAP_PROP_FRAME_WIDTH))}×"
+        f"Camera opened: {int(cam.get(cv2.CAP_PROP_FRAME_WIDTH))}Ã—"
         f"{int(cam.get(cv2.CAP_PROP_FRAME_HEIGHT))}"
     )
     logger.info(f"WebSocket: ws://{cfg.ws_host}:{cfg.ws_port}")
     logger.info("Pipeline running. Press 'q' to quit.")
 
-    # ── Main loop ─────────────────────────────────────────────────────────────
+    # â”€â”€ Main loop â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     fps_times: list[float] = []
     try:
-        while True:
+        while not _stop_signal.is_set():
             ret, frame = cam.read()
             if not ret:
-                logger.warning("Frame capture failed — retrying.")
+                logger.warning("Frame capture failed â€” retrying.")
                 time.sleep(0.05)
                 continue
 
@@ -125,7 +131,7 @@ def run(args):
                     # Forward recording progress to the extension UI
                     _broadcast_recording_event(server, rec_event)
 
-            # 3. Route gestures → ActionEvents
+            # 3. Route gestures â†’ ActionEvents
             events = router.route(frame_result)
 
             # 4. Execute actions and broadcast results
@@ -136,7 +142,7 @@ def run(args):
                 # Log execution
                 cmd_str = result.command or 'N/A'
                 logger.info(
-                    f"→ {event.action_id:25s}  gesture={event.gesture_id:15s} "
+                    f"â†’ {event.action_id:25s}  gesture={event.gesture_id:15s} "
                     f"hand={event.hand:6s}  cmd={cmd_str:20s}  "
                     f"success={result.success}  clients={server.client_count}"
                 )
@@ -169,7 +175,7 @@ def run(args):
 
             # 7. Preview window
             if not args.no_preview:
-                cv2.imshow("GestureSelect — Press Q to quit", annotated)
+                cv2.imshow("GestureSelect â€” Press Q to quit", annotated)
                 key = cv2.waitKey(1) & 0xFF
                 if key == ord("q"):
                     break
@@ -177,7 +183,7 @@ def run(args):
                     logger.info("Manual config reload triggered.")
                     cfg._load()
                 elif key == ord("c"):
-                    logger.info("Buffers cleared — reset gesture history.")
+                    logger.info("Buffers cleared â€” reset gesture history.")
                     # Clear detector buffers
                     for side in ("Left", "Right"):
                         detector._static_buf[side].clear()
@@ -192,10 +198,11 @@ def run(args):
         cv2.destroyAllWindows()
         detector.close()
         server.stop()
+        _pipeline_running = False
         logger.info("Pipeline shut down cleanly.")
 
 
-# ── Recorder ↔ WebSocket Bridge ───────────────────────────────────────────────
+# â”€â”€ Recorder â†” WebSocket Bridge â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 def _attach_recorder_commands(
     server: WebSocketServer,
@@ -251,7 +258,76 @@ def _broadcast_recording_event(server: WebSocketServer, event):
         )
 
 
-# ── Entry Point ───────────────────────────────────────────────────────────────
+# â”€â”€ Entry Point â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+
+# ── HTTP Control Server ─────────────────────────────────────────────
+
+_pipeline_running = False
+_stop_signal = threading.Event()
+
+
+def make_control_handler(stop_event: threading.Event):
+    """Returns an HTTP handler that can signal the pipeline to stop."""
+
+    class ControlHandler(BaseHTTPRequestHandler):
+        def log_message(self, fmt, *args):
+            pass  # silence access logs
+
+        def _cors(self):
+            self.send_header("Access-Control-Allow-Origin", "*")
+            self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+            self.send_header("Access-Control-Allow-Headers", "Content-Type")
+
+        def do_OPTIONS(self):
+            self.send_response(200)
+            self._cors()
+            self.end_headers()
+
+        def do_GET(self):
+            if self.path == "/status":
+                body = json.dumps({
+                    "running": _pipeline_running,
+                    "ws_port": 8765
+                }).encode()
+                self.send_response(200)
+                self.send_header("Content-Type", "application/json")
+                self._cors()
+                self.end_headers()
+                self.wfile.write(body)
+            else:
+                self.send_response(404)
+                self.end_headers()
+
+        def do_POST(self):
+            if self.path == "/stop":
+                stop_event.set()
+                body = json.dumps({"ok": True, "message": "Pipeline stopping"}).encode()
+                self.send_response(200)
+                self.send_header("Content-Type", "application/json")
+                self._cors()
+                self.end_headers()
+                self.wfile.write(body)
+            else:
+                self.send_response(404)
+                self.end_headers()
+
+    return ControlHandler
+
+
+def start_control_server(stop_event: threading.Event, port: int = 8766):
+    """Start the HTTP control server in a daemon thread."""
+    handler = make_control_handler(stop_event)
+    try:
+        httpd = HTTPServer(("localhost", port), handler)
+        t = threading.Thread(target=httpd.serve_forever, daemon=True)
+        t.start()
+        logger = logging.getLogger("control_server")
+        logger.info(f"Control server: http://localhost:{port}")
+        return httpd
+    except OSError as e:
+        logging.getLogger("control_server").warning(f"Control server failed to start: {e}")
+        return None
+
 
 if __name__ == "__main__":
     args = parse_args()
