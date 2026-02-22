@@ -44,7 +44,7 @@ class DTWMatcher:
         self.cfg = config
         config.on_reload(lambda _: logger.info("DTWMatcher: config reloaded."))
 
-    # ── Public API ─────────────────────────────────────────────────────────────
+    # Public API
 
     def match_static(self, live_landmarks: np.ndarray) -> Optional[str]:
         """
@@ -65,7 +65,7 @@ class DTWMatcher:
         live_seq = [self._flatten(f) for f in live_sequence]
         return self._match_against_customs(live_seq, gesture_type="dynamic")
 
-    # ── Core Matching ──────────────────────────────────────────────────────────
+    #Core Matching
 
     def _match_against_customs(
         self,
@@ -117,7 +117,7 @@ class DTWMatcher:
 
         return best_id
 
-    # ── DTW Implementation ─────────────────────────────────────────────────────
+    # DTW Implementation 
 
     @staticmethod
     def _dtw(seq_a: list[np.ndarray], seq_b: list[np.ndarray]) -> float:
@@ -154,7 +154,7 @@ class DTWMatcher:
         norm = np.linalg.norm(vec)
         return vec / (norm + 1e-6)
 
-    # ── Sample Recording Helpers ───────────────────────────────────────────────
+    # Sample Recording
 
     @staticmethod
     def prepare_static_sample(landmarks: np.ndarray) -> list:
