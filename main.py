@@ -94,7 +94,7 @@ def run(args):
     # trigger recording sessions from the UI
     _attach_recorder_commands(server, recorder, cfg)
 
-    # â”€â”€ Camera setup â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    #  Camera setup 
     s = cfg.settings
     cam = cv2.VideoCapture(s.get("camera_index", 0))
     cam.set(cv2.CAP_PROP_FRAME_WIDTH,  s.get("camera_width",  1280))
@@ -111,7 +111,7 @@ def run(args):
     logger.info(f"WebSocket: ws://{cfg.ws_host}:{cfg.ws_port}")
     logger.info("Pipeline running. Press 'q' to quit.")
 
-    # â”€â”€ Main loop â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    #  Main loop
     fps_times: list[float] = []
     try:
         while not _stop_signal.is_set():
@@ -131,7 +131,7 @@ def run(args):
                     # Forward recording progress to the extension UI
                     _broadcast_recording_event(server, rec_event)
 
-            # 3. Route gestures â†’ ActionEvents
+            # 3. Route gestures  ActionEvents
             events = router.route(frame_result)
 
             # 4. Execute actions and broadcast results
@@ -202,7 +202,7 @@ def run(args):
         logger.info("Pipeline shut down cleanly.")
 
 
-# â”€â”€ Recorder â†” WebSocket Bridge â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+#  WebSocket Bridge 
 
 def _attach_recorder_commands(
     server: WebSocketServer,
@@ -258,7 +258,7 @@ def _broadcast_recording_event(server: WebSocketServer, event):
         )
 
 
-# â”€â”€ Entry Point â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+# Entry Point 
 
 # ── HTTP Control Server ─────────────────────────────────────────────
 
