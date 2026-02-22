@@ -1,10 +1,5 @@
 """
 gesture_detector_fixed.py
-─────────────────────────
-Fixed version of gesture_detector.py with proper gestures property access.
-
-This fixes the bug in _build_combo_patterns() where self.gestures was
-being treated as a method instead of a property.
 """
 
 import math

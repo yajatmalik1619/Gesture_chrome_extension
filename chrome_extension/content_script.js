@@ -86,7 +86,6 @@
     
     // Clear any existing selection
     window.getSelection().removeAllRanges();
-    
     console.log('[GestureSelect] Text selection started');
   }
   
