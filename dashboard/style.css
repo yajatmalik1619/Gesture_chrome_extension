@@ -1,0 +1,72 @@
+:root {
+    --primary: #6366f1;
+    --primary-blur: rgba(99, 102, 241, 0.1);
+    --bg-dark: #0f172a;
+    --sidebar-bg: rgba(30, 41, 59, 0.5);
+    --card-bg: rgba(30, 41, 59, 0.4);
+    --border: rgba(148, 163, 184, 0.1);
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+    width: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+    background: rgba(148, 163, 184, 0.2);
+    border-radius: 10px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: rgba(148, 163, 184, 0.4);
+}
+
+.gesture-card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.gesture-card:hover {
+    background: rgba(30, 41, 59, 0.7);
+    border-color: rgba(99, 102, 241, 0.3);
+    transform: translateX(4px);
+}
+
+.gesture-card.active {
+    background: rgba(99, 102, 241, 0.1);
+    border-color: rgba(99, 102, 241, 0.5);
+}
+
+#configOverlay.show {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+#configOverlay.show > div {
+    transform: translateX(0);
+}
+
+.action-type-btn.active {
+    border-color: #6366f1;
+    background: rgba(99, 102, 241, 0.1);
+    color: white;
+}
+
+#shortcutInput:focus {
+    box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.5);
+}
+
+/* Animations */
+@keyframes pulse-ring {
+    0% { transform: scale(0.95); opacity: 0.5; }
+    50% { transform: scale(1.05); opacity: 0.8; }
+    100% { transform: scale(0.95); opacity: 0.5; }
+}
+
+.recording-indicator {
+    animation: pulse-ring 2s infinite;
+}
