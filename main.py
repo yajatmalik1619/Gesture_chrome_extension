@@ -245,6 +245,23 @@ def _attach_recorder_commands(
             event = recorder.cancel()
             if event:
                 _broadcast_recording_event(server, event)
+        elif msg.get("type") == "SAVE_GESTURE":
+            gesture_id = msg.get("gesture_id")
+            gesture_data = msg.get("gesture_data")
+            action_id = msg.get("action_id")
+            
+            # Save the landmarks/gesture definition
+            cfg.save_custom_gesture(gesture_id, gesture_data)
+            
+            # Update the binding if an action was specified
+            if action_id:
+                cfg.set_binding(gesture_id, action_id)
+                
+            await ws.send(json.dumps({
+                "type": "ACK",
+                "gesture_saved": True,
+                "gesture_id": gesture_id
+            }))
         else:
             await original_handler(ws, raw)
 

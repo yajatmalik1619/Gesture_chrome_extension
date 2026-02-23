@@ -184,6 +184,52 @@
       "type": "text_selection",
       "repeatable": false,
       "selection_action": "search"
+    },
+    "play_pause": {
+      "label": "Play/Pause",
+      "type": "keyboard",
+      "repeatable": false,
+      "shortcut": "space"
+    },
+    "mute_unmute": {
+      "label": "Mute/Unmute",
+      "type": "keyboard",
+      "repeatable": false,
+      "shortcut": "m"
+    },
+    "volume_up": {
+      "label": "Volume Up",
+      "type": "keyboard",
+      "repeatable": true,
+      "shortcut": "up"
+    },
+    "volume_down": {
+      "label": "Volume Down",
+      "type": "keyboard",
+      "repeatable": true,
+      "shortcut": "down"
+    },
+    "seek_forward": {
+      "label": "Seek Forward 10s",
+      "type": "keyboard",
+      "repeatable": true,
+      "shortcut": "l"
+    },
+    "seek_backward": {
+      "label": "Seek Backward 10s",
+      "type": "keyboard",
+      "repeatable": true,
+      "shortcut": "j"
+    },
+    "minimize_window": {
+      "label": "Minimize Window",
+      "type": "system",
+      "command": "minimize_window"
+    },
+    "maximize_window": {
+      "label": "Maximize Window",
+      "type": "system",
+      "command": "maximize_window"
     }
   },
   "gestures": {
@@ -191,118 +237,59 @@
       "label": "Fist",
       "type": "static",
       "hand": "any",
-      "enabled": true,
-      "description": "All fingers closed"
+      "enabled": true
     },
     "PALM": {
       "label": "Open Palm",
       "type": "static",
       "hand": "any",
-      "enabled": true,
-      "description": "All fingers extended"
+      "enabled": true
     },
     "THUMBS_UP": {
       "label": "Thumbs Up",
       "type": "static",
       "hand": "any",
-      "enabled": true,
-      "description": "Thumb extended, all other fingers closed"
-    },
-    "PEACE": {
-      "label": "Peace Sign",
-      "type": "static",
-      "hand": "any",
-      "enabled": true,
-      "description": "Index and middle fingers extended in V shape"
+      "enabled": true
     },
     "INDEX_ONLY": {
       "label": "Index Finger Only",
       "type": "static",
       "hand": "any",
-      "enabled": true,
-      "description": "Only index finger extended (no middle finger)"
+      "enabled": true
     },
-    "OK": {
-      "label": "OK Sign",
+    "LEFT": {
+      "label": "Point Left",
       "type": "static",
       "hand": "any",
-      "enabled": true,
-      "description": "Thumb and index finger touching, other fingers extended"
+      "enabled": true
     },
-    "POINTING_UP": {
-      "label": "Pointing Up",
+    "RIGHT": {
+      "label": "Point Right",
       "type": "static",
       "hand": "any",
-      "enabled": true,
-      "description": "Index finger pointing upward"
-    },
-    "POINTING_DOWN": {
-      "label": "Pointing Down",
-      "type": "static",
-      "hand": "any",
-      "enabled": true,
-      "description": "Index finger pointing downward"
-    },
-    "SWIPE_LEFT": {
-      "label": "Swipe Left",
-      "type": "dynamic",
-      "hand": "any",
-      "enabled": true,
-      "description": "Quick horizontal movement to the left"
-    },
-    "SWIPE_RIGHT": {
-      "label": "Swipe Right",
-      "type": "dynamic",
-      "hand": "any",
-      "enabled": true,
-      "description": "Quick horizontal movement to the right"
+      "enabled": true
     },
     "SWIPE_UP": {
       "label": "Swipe Up",
       "type": "dynamic",
       "hand": "any",
-      "enabled": true,
-      "description": "Quick vertical movement upward"
+      "enabled": true
     },
     "SWIPE_DOWN": {
       "label": "Swipe Down",
       "type": "dynamic",
       "hand": "any",
-      "enabled": true,
-      "description": "Quick vertical movement downward"
-    },
-    "WAVE": {
-      "label": "Wave",
-      "type": "dynamic",
-      "hand": "any",
-      "enabled": true,
-      "description": "Side-to-side oscillating motion"
-    },
-    "TWO_FISTS": {
-      "label": "Two Fists Together",
-      "type": "combo",
-      "enabled": true,
-      "combo_rule": ["FIST", "FIST"],
-      "description": "Both hands in fist position"
+      "enabled": true
     }
   },
   "bindings": {
-    "_comment": "PREDEFINED BINDINGS - mapped to built-in gestures",
-    "PALM": "tab_new",
+    "SWIPE_DOWN": "minimize_window",
+    "SWIPE_UP": "maximize_window",
+    "LEFT": "tab_switch_left",
+    "RIGHT": "tab_switch_right",
+    "INDEX_ONLY": "tab_new",
     "FIST": "tab_close",
-    "SWIPE_RIGHT": "tab_switch_right",
-    "SWIPE_LEFT": "tab_switch_left",
-    "SWIPE_UP": "window_minimize",
-    "SWIPE_DOWN": "window_maximize",
-    "WAVE": "refresh_page",
     "THUMBS_UP": "fullscreen_toggle",
-    "PEACE": "back",
-    "INDEX_ONLY": "text_select_start",
-    "OK": "text_search_google",
-    "POINTING_UP": "scroll_up",
-    "POINTING_DOWN": "scroll_down",
-    "TWO_FISTS": "scroll_stop",
-    
     "_comment_user_defined": "USER-DEFINED BINDINGS - capture landmarks and map to actions",
     "_user_new_window": "Capture gesture for: new_window",
     "_user_new_incognito": "Capture gesture for: new_incognito_window",

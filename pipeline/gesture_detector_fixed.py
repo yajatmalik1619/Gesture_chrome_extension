@@ -323,6 +323,44 @@ class GestureDetector:
                 return "LEFT"
             elif 180 + half <= angle < 270 + half:
                 return "DOWN"
+        
+        # Finally, try matching against custom recorded gestures
+        return self._detect_custom(lm)
+
+    def _detect_custom(self, landmarks: np.ndarray) -> str:
+        """Match landmarks against custom recorded samples."""
+        custom_gestures = self._cfg.get("custom_gestures", default={})
+        if not custom_gestures:
+            return "UNKNOWN"
+            
+        best_match = "UNKNOWN"
+        min_dist = float('inf')
+        threshold = 0.5 # Normalized distance threshold
+        
+        # Normalize current landmarks (translate wrist to origin)
+        wrist = landmarks[0]
+        norm_lm = landmarks - wrist
+        
+        for gid, data in custom_gestures.items():
+            if not data.get("enabled", True):
+                continue
+            samples = data.get("samples", [])
+            for sample in samples:
+                s_lms = np.array(sample.get("landmarks", []))
+                if s_lms.shape != norm_lm.shape:
+                    continue
+                # Normalize sample
+                s_wrist = s_lms[0]
+                s_norm = s_lms - s_wrist
+                
+                # Compute total Euclidean distance across all landmarks
+                dist = np.linalg.norm(norm_lm - s_norm)
+                if dist < min_dist:
+                    min_dist = dist
+                    best_match = gid
+                    
+        if min_dist < threshold:
+            return best_match
         return "UNKNOWN"
 
     # ── Dynamic Gesture Detection ─────────────────────────────────────────

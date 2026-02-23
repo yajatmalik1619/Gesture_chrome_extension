@@ -8,17 +8,20 @@ export class GestureRecorder {
     constructor() {
         this.handLandmarker = undefined;
         this.webcamRunning = false;
-        this.video = document.getElementById("webcam");
-        this.canvasElement = document.getElementById("output_canvas");
-        this.canvasCtx = this.canvasElement.getContext("2d");
+        this.video = null;
+        this.canvasElement = null;
+        this.canvasCtx = null;
         this.drawingUtils = undefined;
         this.results = undefined;
         this.lastVideoTime = -1;
         this.isRecording = false;
         this.recordedFrames = [];
+        this.stream = null;
     }
 
-    async initialize() {
+    async initialize(videoId, canvasId) {
+        this.setTargetElements(videoId, canvasId);
+
         const vision = await FilesetResolver.forVisionTasks(
             "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.0/wasm"
         );
@@ -31,24 +34,33 @@ export class GestureRecorder {
             numHands: 2
         });
 
-        this.drawingUtils = new DrawingUtils(this.canvasCtx);
-        this.startWebcam();
+        await this.startWebcam();
+    }
+
+    setTargetElements(videoId, canvasId) {
+        this.video = document.getElementById(videoId);
+        this.canvasElement = document.getElementById(canvasId);
+        if (this.canvasElement) {
+            this.canvasCtx = this.canvasElement.getContext("2d");
+            this.drawingUtils = new DrawingUtils(this.canvasCtx);
+        }
+
+        // If we already have a stream, attach it to the new video element
+        if (this.stream && this.video) {
+            this.video.srcObject = this.stream;
+        }
     }
 
     async startWebcam() {
-        if (!this.handLandmarker) {
-            console.log("Wait! objectDetector not loaded yet.");
-            return;
-        }
+        if (!this.handLandmarker) return;
 
-        const constraints = {
-            video: true
-        };
-
+        const constraints = { video: true };
         try {
-            const stream = await navigator.mediaDevices.getUserMedia(constraints);
-            this.video.srcObject = stream;
-            this.video.addEventListener("loadeddata", () => this.predictWebcam());
+            this.stream = await navigator.mediaDevices.getUserMedia(constraints);
+            if (this.video) {
+                this.video.srcObject = this.stream;
+                this.video.addEventListener("loadeddata", () => this.predictWebcam());
+            }
             this.webcamRunning = true;
         } catch (err) {
             console.error("Error accessing webcam: ", err);
@@ -56,9 +68,16 @@ export class GestureRecorder {
     }
 
     async predictWebcam() {
+        if (!this.webcamRunning || !this.video || !this.canvasElement) {
+            window.requestAnimationFrame(() => this.predictWebcam());
+            return;
+        }
+
         // Resize canvas to match video
-        this.canvasElement.width = this.video.videoWidth;
-        this.canvasElement.height = this.video.videoHeight;
+        if (this.video.videoWidth > 0 && this.canvasElement.width !== this.video.videoWidth) {
+            this.canvasElement.width = this.video.videoWidth;
+            this.canvasElement.height = this.video.videoHeight;
+        }
 
         let startTimeMs = performance.now();
         if (this.lastVideoTime !== this.video.currentTime) {
@@ -69,9 +88,8 @@ export class GestureRecorder {
         this.canvasCtx.save();
         this.canvasCtx.clearRect(0, 0, this.canvasElement.width, this.canvasElement.height);
 
-        if (this.results.landmarks) {
-            if (this.isRecording) {
-                // Collect landmarks for the first hand detected
+        if (this.results && this.results.landmarks) {
+            if (this.isRecording && this.results.landmarks[0]) {
                 this.recordedFrames.push(this.results.landmarks[0]);
             }
 
@@ -89,9 +107,7 @@ export class GestureRecorder {
         }
         this.canvasCtx.restore();
 
-        if (this.webcamRunning) {
-            window.requestAnimationFrame(() => this.predictWebcam());
-        }
+        window.requestAnimationFrame(() => this.predictWebcam());
     }
 
     startRecording() {
