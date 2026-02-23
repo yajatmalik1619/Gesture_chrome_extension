@@ -42,14 +42,23 @@
         }
 
         #status {
-            font-size: 13px;
-            color: #7c3aed;
-            min-height: 20px;
+            font-size: 15px;
+            font-weight: 600;
+            min-height: 22px;
+            text-align: center;
+        }
+
+        #status.success {
+            color: #34d399;
+        }
+
+        #status.error {
+            color: #f87171;
         }
 
         video {
             width: 360px;
-            height: 270px;
+            height: 202px;
             border-radius: 10px;
             background: #1e1e2e;
             border: 2px solid #7c3aed;
@@ -57,7 +66,7 @@
         }
 
         .btn {
-            padding: 10px 24px;
+            padding: 10px 28px;
             border-radius: 8px;
             border: none;
             font-size: 14px;
@@ -65,6 +74,7 @@
             cursor: pointer;
             background: #7c3aed;
             color: #fff;
+            transition: background 0.15s;
         }
 
         .btn:hover {
@@ -76,12 +86,10 @@
             cursor: not-allowed;
         }
 
-        .success {
-            color: #34d399;
-        }
-
-        .error {
-            color: #f87171;
+        #countdown {
+            font-size: 12px;
+            color: #4b5563;
+            display: none;
         }
     </style>
 </head>
@@ -89,63 +97,17 @@
 <body>
     <div class="icon">📷</div>
     <h1>Camera Access Required</h1>
-    <p>GestureSelect needs camera access to show a live preview when the pipeline is not running.</p>
+    <p>GestureSelect needs your camera to show a live preview when the pipeline is off. Click below — Chrome will prompt
+        you to allow.</p>
 
     <video id="preview" autoplay playsinline muted></video>
-    <div id="status">Click the button below to allow camera access.</div>
 
-    <button class="btn" id="allowBtn">Allow Camera Access</button>
-    <button class="btn" id="doneBtn" style="background:#1e1e2e;border:1px solid #334155;display:none;">
-        ✓ Done — Close this tab
-    </button>
+    <div id="status"></div>
 
-    <script>
-        const preview = document.getElementById('preview');
-        const statusEl = document.getElementById('status');
-        const allowBtn = document.getElementById('allowBtn');
-        const doneBtn = document.getElementById('doneBtn');
+    <button class="btn" id="allowBtn">📷 Allow Camera Access</button>
+    <div id="countdown"></div>
 
-        allowBtn.addEventListener('click', async () => {
-            allowBtn.disabled = true;
-            statusEl.textContent = 'Requesting camera access...';
-            statusEl.className = '';
-
-            try {
-                const stream = await navigator.mediaDevices.getUserMedia({
-                    video: { width: { ideal: 640 }, height: { ideal: 480 }, facingMode: 'user' },
-                    audio: false
-                });
-
-                // Show live preview so user sees it worked
-                preview.srcObject = stream;
-                preview.style.display = 'block';
-                statusEl.textContent = '✓ Camera access granted! You can close this tab.';
-                statusEl.className = 'success';
-                allowBtn.style.display = 'none';
-                doneBtn.style.display = 'block';
-
-                // Keep stream alive for 3s so user sees it, then stop
-                setTimeout(() => {
-                    stream.getTracks().forEach(t => t.stop());
-                    window.close();
-                }, 3000);
-
-            } catch (err) {
-                allowBtn.disabled = false;
-                statusEl.className = 'error';
-                if (err.name === 'NotAllowedError') {
-                    statusEl.textContent = 'Permission denied. Click the camera icon in the address bar to allow.';
-                } else {
-                    statusEl.textContent = `Error: ${err.name} — ${err.message}`;
-                }
-            }
-        });
-
-        doneBtn.addEventListener('click', () => window.close());
-
-        // Auto-request on page load (triggers Chrome's permission prompt)
-        window.addEventListener('load', () => allowBtn.click());
-    </script>
+    <script src="camera_permission.js"></script>
 </body>
 
 </html>

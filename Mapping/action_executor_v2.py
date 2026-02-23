@@ -11,6 +11,7 @@ import platform
 from typing import Optional, Dict, Any
 from dataclasses import dataclass
 import math
+import time
 
 from pipeline.config_manager import ConfigManager
 from pipeline.gesture_router import ActionEvent
@@ -54,6 +55,7 @@ class ActionExecutor:
             "selected_text": "",
             "direction": None  # "horizontal" or "vertical"
         }
+        self._last_execution_times: Dict[str, float] = {}
         logger.info(f"ActionExecutor initialized for {self._os_type}")
 
     def _detect_os(self) -> str:
@@ -78,6 +80,21 @@ class ActionExecutor:
                 action_id=event.action_id,
                 error=f"Action not found: {event.action_id}"
             )
+
+        # ── Debounce non-repeatable actions ──
+        is_repeatable = action_def.get("repeatable", False)
+        if not is_repeatable:
+            now = time.time()
+            last_time = self._last_execution_times.get(event.action_id, 0.0)
+            cooldown = 1.5  # 1.5 seconds cooldown for non-repeatable actions
+            if now - last_time < cooldown:
+                # Silently ignore to prevent spam
+                return ExecutionResult(
+                    success=False,
+                    action_id=event.action_id,
+                    error="Cooldown active"
+                )
+            self._last_execution_times[event.action_id] = now
 
         action_type = action_def.get("type", "unknown")
         

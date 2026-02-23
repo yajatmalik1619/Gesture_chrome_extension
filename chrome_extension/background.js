@@ -174,8 +174,9 @@ async function executeCommand(exec) {
 // ── Keyboard Shortcuts ─────────────────────────────────────────────────────────
 
 async function executeKeyboardShortcut(params) {
-  const { shortcut, repeat = 1 } = params;
-  const keys = shortcut.toLowerCase().split('+').map(k => k.trim());
+  const { shortcut: rawShortcut, repeat = 1 } = params;
+  const shortcut = rawShortcut.toLowerCase().trim(); // normalise case from Python
+  const keys = shortcut.split('+').map(k => k.trim());
   const modifiers = {
     ctrl: keys.includes('ctrl'),
     alt: keys.includes('alt'),
@@ -189,15 +190,13 @@ async function executeKeyboardShortcut(params) {
   else if (shortcut === 'ctrl+t' || shortcut === 'cmd+t') await openNewTab();
   else if (shortcut === 'ctrl+shift+t' || shortcut === 'cmd+shift+t') await reopenClosedTab();
   else if (shortcut === 'f5' || shortcut === 'ctrl+r' || shortcut === 'cmd+r') await refreshPage();
+  else if (shortcut === 'f11' || shortcut === 'ctrl+shift+f') await toggleFullscreen();
+  else if (shortcut === 'alt+left' || shortcut === 'cmd+[') await goBack();
+  else if (shortcut === 'alt+right' || shortcut === 'cmd+]') await goForward();
   else await sendToContent({ type: 'KEYBOARD_SHORTCUT', shortcut, modifiers, key: mainKey, repeat });
 }
 
 // ── Tab Management ─────────────────────────────────────────────────────────────
-
-async function refreshPage() {
-  const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
-  if (tabs[0]) await chrome.tabs.reload(tabs[0].id);
-}
 
 async function switchTab(delta) {
   const tabs = await chrome.tabs.query({ currentWindow: true });
@@ -227,6 +226,22 @@ async function minimizeWindow() {
 async function maximizeWindow() {
   const w = await chrome.windows.getCurrent();
   await chrome.windows.update(w.id, { state: w.state === 'maximized' ? 'normal' : 'maximized' });
+}
+async function toggleFullscreen() {
+  // Chrome API for fullscreen — synthetic F11 keydown blocked by browser security
+  const w = await chrome.windows.getCurrent();
+  const next = w.state === 'fullscreen' ? 'normal' : 'fullscreen';
+  await chrome.windows.update(w.id, { state: next });
+}
+
+async function goBack() {
+  const [t] = await chrome.tabs.query({ active: true, currentWindow: true });
+  if (t) await chrome.tabs.goBack(t.id);
+}
+
+async function goForward() {
+  const [t] = await chrome.tabs.query({ active: true, currentWindow: true });
+  if (t) await chrome.tabs.goForward(t.id);
 }
 
 // ── Text Selection & Search ────────────────────────────────────────────────────

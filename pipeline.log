@@ -4962,3 +4962,801 @@ Traceback (most recent call last):
 ConnectionAbortedError: [WinError 10053] An established connection was aborted by the software in your host machine
 ----------------------------------------
 21:36:00 [INFO] pipeline.websocket_server: Client disconnected: ::1:63567  (total: 0)
+23:00:03 [INFO] main: Starting GestureSelect pipeline...
+23:00:03 [INFO] pipeline.config_manager: Config loaded from gestures_config_v2.json
+23:00:03 [INFO] pipeline.config_manager: Config file watcher started.
+23:00:03 [INFO] pipeline.task_mapper: GestureTaskMapper initialised.
+23:00:03 [INFO] pipeline.mediapipe_detection: MediaPipe Hands initialised.
+23:00:03 [INFO] Mapping.action_executor_v2: ActionExecutor initialized for windows
+23:00:03 [INFO] pipeline.websocket_server: WebSocket server starting on ws://localhost:8765
+INFO: Created TensorFlow Lite XNNPACK delegate for CPU.
+23:00:03 [INFO] websockets.server: server listening on 127.0.0.1:8765
+23:00:03 [INFO] websockets.server: server listening on [::1]:8765
+23:00:03 [INFO] pipeline.websocket_server: WebSocket server live on ws://localhost:8765
+23:00:03 [INFO] pipeline.mjpeg_server: MJPEG stream: http://localhost:8767/stream
+23:00:03 [INFO] control_server: Control server: http://localhost:8766
+23:00:05 [INFO] websockets.server: connection open
+23:00:05 [INFO] pipeline.websocket_server: Client connected: ::1:51554  (total: 1)
+23:00:28 [INFO] main: Camera opened: 1280×720
+23:00:28 [INFO] main: WebSocket: ws://localhost:8765
+23:00:28 [INFO] main: Pipeline running. Press 'q' to quit.
+----------------------------------------
+----------------------------------------
+Exception occurred during processing of request from ('127.0.0.1', 52626)
+Exception occurred during processing of request from ('127.0.0.1', 58868)
+Traceback (most recent call last):
+  File "C:\Users\Kanishka\AppData\Local\Programs\Python\Python311\Lib\socketserver.py", line 691, in process_request_thread
+    self.finish_request(request, client_address)
+  File "C:\Users\Kanishka\AppData\Local\Programs\Python\Python311\Lib\socketserver.py", line 361, in finish_request
+    self.RequestHandlerClass(request, client_address, self)
+Traceback (most recent call last):
+  File "C:\Users\Kanishka\AppData\Local\Programs\Python\Python311\Lib\socketserver.py", line 755, in __init__
+    self.handle()
+  File "C:\Users\Kanishka\AppData\Local\Programs\Python\Python311\Lib\http\server.py", line 436, in handle
+    self.handle_one_request()
+  File "C:\Users\Kanishka\AppData\Local\Programs\Python\Python311\Lib\socketserver.py", line 691, in process_request_thread
+    self.finish_request(request, client_address)
+  File "C:\Users\Kanishka\AppData\Local\Programs\Python\Python311\Lib\http\server.py", line 424, in handle_one_request
+    method()
+  File "C:\Users\Kanishka\AppData\Local\Programs\Python\Python311\Lib\socketserver.py", line 361, in finish_request
+    self.RequestHandlerClass(request, client_address, self)
+  File "C:\Users\Kanishka\AppData\Local\Programs\Python\Python311\Lib\socketserver.py", line 755, in __init__
+    self.handle()
+  File "C:\Users\Kanishka\AppData\Local\Programs\Python\Python311\Lib\http\server.py", line 436, in handle
+    self.handle_one_request()
+  File "C:\Users\Kanishka\AppData\Local\Programs\Python\Python311\Lib\http\server.py", line 424, in handle_one_request
+    method()
+  File "C:\Users\Kanishka\Code\Gesture_chrome_extension\pipeline\mjpeg_server.py", line 72, in do_GET
+    self.wfile.write(b"Content-Type: image/jpeg\r\n\r\n")
+  File "C:\Users\Kanishka\Code\Gesture_chrome_extension\pipeline\mjpeg_server.py", line 72, in do_GET
+    self.wfile.write(b"Content-Type: image/jpeg\r\n\r\n")
+  File "C:\Users\Kanishka\AppData\Local\Programs\Python\Python311\Lib\socketserver.py", line 834, in write
+    self._sock.sendall(b)
+  File "C:\Users\Kanishka\AppData\Local\Programs\Python\Python311\Lib\socketserver.py", line 834, in write
+    self._sock.sendall(b)
+ConnectionAbortedError: [WinError 10053] An established connection was aborted by the software in your host machine
+ConnectionAbortedError: [WinError 10053] An established connection was aborted by the software in your host machine
+----------------------------------------
+----------------------------------------
+23:00:32 [INFO] pipeline.config_manager: Config saved.
+23:00:32 [INFO] pipeline.config_manager: Binding updated: PALM → tab_new
+23:00:32 [INFO] pipeline.config_manager: Config saved.
+23:00:32 [INFO] pipeline.task_mapper: Mapping updated: PALM -> tab_new
+23:00:32 [INFO] pipeline.websocket_server: Client disconnected: ::1:51554  (total: 0)
+23:00:32 [ERROR] websockets.server: connection handler failed
+Traceback (most recent call last):
+  File "C:\Users\Kanishka\Code\Gesture_chrome_extension\venv\Lib\site-packages\websockets\asyncio\server.py", line 376, in conn_handler
+    await self.handler(connection)
+  File "C:\Users\Kanishka\Code\Gesture_chrome_extension\pipeline\websocket_server.py", line 170, in _handler
+    await self._handle_inbound(websocket, raw)
+  File "C:\Users\Kanishka\Code\Gesture_chrome_extension\main.py", line 271, in patched_handler
+    logger.info(f"[Mapper] Binding updated: {gesture_id} -> {task_id}")
+    ^^^^^^
+NameError: name 'logger' is not defined
+23:00:35 [INFO] websockets.server: connection open
+23:00:35 [INFO] pipeline.websocket_server: Client connected: ::1:51054  (total: 1)
+23:00:40 [INFO] main: [ACT] tab_new                    gesture=PALM            hand=Right   cmd=KEYBOARD_SHORTCUT     ok=True  clients=1
+23:00:40 [INFO] main: [ACT] tab_new                    gesture=PALM            hand=Left    cmd=KEYBOARD_SHORTCUT     ok=True  clients=1
+----------------------------------------
+Exception occurred during processing of request from ('127.0.0.1', 58662)
+Traceback (most recent call last):
+  File "C:\Users\Kanishka\AppData\Local\Programs\Python\Python311\Lib\socketserver.py", line 691, in process_request_thread
+    self.finish_request(request, client_address)
+  File "C:\Users\Kanishka\AppData\Local\Programs\Python\Python311\Lib\socketserver.py", line 361, in finish_request
+    self.RequestHandlerClass(request, client_address, self)
+  File "C:\Users\Kanishka\AppData\Local\Programs\Python\Python311\Lib\socketserver.py", line 755, in __init__
+    self.handle()
+  File "C:\Users\Kanishka\AppData\Local\Programs\Python\Python311\Lib\http\server.py", line 436, in handle
+    self.handle_one_request()
+  File "C:\Users\Kanishka\AppData\Local\Programs\Python\Python311\Lib\http\server.py", line 424, in handle_one_request
+    method()
+  File "C:\Users\Kanishka\Code\Gesture_chrome_extension\pipeline\mjpeg_server.py", line 72, in do_GET
+    self.wfile.write(b"Content-Type: image/jpeg\r\n\r\n")
+  File "C:\Users\Kanishka\AppData\Local\Programs\Python\Python311\Lib\socketserver.py", line 834, in write
+    self._sock.sendall(b)
+ConnectionAbortedError: [WinError 10053] An established connection was aborted by the software in your host machine
+----------------------------------------
+23:00:46 [INFO] pipeline.config_manager: Config saved.
+23:00:46 [INFO] pipeline.config_manager: Binding updated: PALM → refresh_page
+23:00:46 [INFO] pipeline.task_mapper: Mapping updated: PALM -> refresh_page
+23:00:46 [INFO] pipeline.websocket_server: Client disconnected: ::1:51054  (total: 0)
+23:00:46 [ERROR] websockets.server: connection handler failed
+Traceback (most recent call last):
+  File "C:\Users\Kanishka\Code\Gesture_chrome_extension\venv\Lib\site-packages\websockets\asyncio\server.py", line 376, in conn_handler
+    await self.handler(connection)
+  File "C:\Users\Kanishka\Code\Gesture_chrome_extension\pipeline\websocket_server.py", line 170, in _handler
+    await self._handle_inbound(websocket, raw)
+  File "C:\Users\Kanishka\Code\Gesture_chrome_extension\main.py", line 271, in patched_handler
+    logger.info(f"[Mapper] Binding updated: {gesture_id} -> {task_id}")
+    ^^^^^^
+NameError: name 'logger' is not defined
+23:00:47 [INFO] main: [ACT] refresh_page               gesture=PALM            hand=Right   cmd=KEYBOARD_SHORTCUT     ok=True  clients=0
+23:00:47 [INFO] main: [ACT] refresh_page               gesture=PALM            hand=Left    cmd=KEYBOARD_SHORTCUT     ok=True  clients=0
+23:00:48 [INFO] main: [ACT] window_maximize            gesture=SWIPE_UP        hand=Left    cmd=MAXIMIZE_WINDOW       ok=True  clients=0
+23:00:48 [INFO] main: [ACT] refresh_page               gesture=PALM            hand=Left    cmd=KEYBOARD_SHORTCUT     ok=True  clients=0
+23:00:49 [INFO] main: [ACT] window_minimize            gesture=SWIPE_DOWN      hand=Left    cmd=MINIMIZE_WINDOW       ok=True  clients=0
+23:00:49 [INFO] websockets.server: connection open
+23:00:49 [INFO] pipeline.websocket_server: Client connected: ::1:49363  (total: 1)
+23:00:50 [INFO] pipeline.gesture_router: Multiplier locked: Left hand â†’ 1 fingers
+23:00:50 [INFO] pipeline.gesture_router: Multiplier released: Left hand
+23:00:50 [INFO] main: [ACT] tab_new                    gesture=INDEX_ONLY      hand=Left    cmd=KEYBOARD_SHORTCUT     ok=True  clients=1
+23:00:51 [INFO] pipeline.gesture_router: Multiplier locked: Left hand â†’ 1 fingers
+23:00:51 [INFO] pipeline.gesture_router: Multiplier released: Left hand
+23:00:54 [INFO] main: [ACT] refresh_page               gesture=PALM            hand=Left    cmd=KEYBOARD_SHORTCUT     ok=True  clients=1
+23:00:54 [INFO] main: [ACT] refresh_page               gesture=PALM            hand=Right   cmd=KEYBOARD_SHORTCUT     ok=True  clients=1
+23:00:55 [INFO] pipeline.gesture_router: Multiplier locked: Left hand â†’ 5 fingers
+23:00:56 [INFO] pipeline.gesture_router: Multiplier released: Left hand
+23:00:57 [INFO] main: [ACT] window_minimize            gesture=SWIPE_DOWN      hand=Left    cmd=MINIMIZE_WINDOW       ok=True  clients=1
+23:00:57 [INFO] main: [ACT] refresh_page               gesture=PALM            hand=Left    cmd=KEYBOARD_SHORTCUT     ok=True  clients=1
+23:01:04 [INFO] main: [ACT] refresh_page               gesture=PALM            hand=Right   cmd=KEYBOARD_SHORTCUT     ok=True  clients=1
+23:01:04 [INFO] main: [ACT] refresh_page               gesture=PALM            hand=Left    cmd=KEYBOARD_SHORTCUT     ok=True  clients=1
+23:01:13 [INFO] pipeline.config_manager: Config saved.
+23:01:13 [INFO] pipeline.config_manager: Binding updated: PALM → tab_close
+23:01:13 [INFO] pipeline.task_mapper: Mapping updated: PALM -> tab_close
+23:01:13 [INFO] pipeline.websocket_server: Client disconnected: ::1:49363  (total: 0)
+23:01:13 [ERROR] websockets.server: connection handler failed
+Traceback (most recent call last):
+  File "C:\Users\Kanishka\Code\Gesture_chrome_extension\venv\Lib\site-packages\websockets\asyncio\server.py", line 376, in conn_handler
+    await self.handler(connection)
+  File "C:\Users\Kanishka\Code\Gesture_chrome_extension\pipeline\websocket_server.py", line 170, in _handler
+    await self._handle_inbound(websocket, raw)
+  File "C:\Users\Kanishka\Code\Gesture_chrome_extension\main.py", line 271, in patched_handler
+    logger.info(f"[Mapper] Binding updated: {gesture_id} -> {task_id}")
+    ^^^^^^
+NameError: name 'logger' is not defined
+23:01:14 [INFO] main: [ACT] tab_close                  gesture=PALM            hand=Right   cmd=KEYBOARD_SHORTCUT     ok=True  clients=0
+23:01:14 [INFO] main: [ACT] tab_close                  gesture=PALM            hand=Left    cmd=KEYBOARD_SHORTCUT     ok=True  clients=0
+23:01:16 [INFO] websockets.server: connection open
+23:01:16 [INFO] pipeline.websocket_server: Client connected: ::1:53073  (total: 1)
+23:01:17 [INFO] pipeline.gesture_router: Multiplier locked: Left hand â†’ 5 fingers
+23:01:18 [INFO] pipeline.gesture_router: Multiplier released: Left hand
+23:01:18 [INFO] pipeline.gesture_router: Tab swipe: Left hand, 5f Ã— 1x = 5 tabs
+23:01:18 [INFO] main: [ACT] tab_switch_left            gesture=SWIPE_LEFT      hand=Left    cmd=KEYBOARD_SHORTCUT     ok=True  clients=1
+23:01:18 [INFO] main: [ACT] tab_close                  gesture=PALM            hand=Left    cmd=KEYBOARD_SHORTCUT     ok=True  clients=1
+23:01:18 [INFO] pipeline.gesture_router: Multiplier locked: Left hand â†’ 5 fingers
+----------------------------------------
+Exception occurred during processing of request from ('127.0.0.1', 59141)
+Traceback (most recent call last):
+  File "C:\Users\Kanishka\AppData\Local\Programs\Python\Python311\Lib\socketserver.py", line 691, in process_request_thread
+    self.finish_request(request, client_address)
+  File "C:\Users\Kanishka\AppData\Local\Programs\Python\Python311\Lib\socketserver.py", line 361, in finish_request
+    self.RequestHandlerClass(request, client_address, self)
+  File "C:\Users\Kanishka\AppData\Local\Programs\Python\Python311\Lib\socketserver.py", line 755, in __init__
+    self.handle()
+  File "C:\Users\Kanishka\AppData\Local\Programs\Python\Python311\Lib\http\server.py", line 436, in handle
+    self.handle_one_request()
+  File "C:\Users\Kanishka\AppData\Local\Programs\Python\Python311\Lib\http\server.py", line 424, in handle_one_request
+    method()
+  File "C:\Users\Kanishka\Code\Gesture_chrome_extension\pipeline\mjpeg_server.py", line 72, in do_GET
+    self.wfile.write(b"Content-Type: image/jpeg\r\n\r\n")
+  File "C:\Users\Kanishka\AppData\Local\Programs\Python\Python311\Lib\socketserver.py", line 834, in write
+    self._sock.sendall(b)
+ConnectionAbortedError: [WinError 10053] An established connection was aborted by the software in your host machine
+----------------------------------------
+23:01:22 [INFO] pipeline.gesture_router: Multiplier released: Left hand
+23:01:23 [INFO] pipeline.gesture_router: Multiplier locked: Left hand â†’ 5 fingers
+23:01:23 [INFO] pipeline.gesture_router: Multiplier released: Left hand
+23:01:24 [INFO] main: [ACT] window_minimize            gesture=SWIPE_DOWN      hand=Left    cmd=MINIMIZE_WINDOW       ok=True  clients=1
+23:01:28 [INFO] main: [ACT] tab_close                  gesture=PALM            hand=Left    cmd=KEYBOARD_SHORTCUT     ok=True  clients=1
+23:01:28 [INFO] main: [ACT] tab_close                  gesture=PALM            hand=Right   cmd=KEYBOARD_SHORTCUT     ok=True  clients=1
+23:01:36 [INFO] main: [ACT] tab_close                  gesture=PALM            hand=Right   cmd=KEYBOARD_SHORTCUT     ok=True  clients=1
+----------------------------------------
+Exception occurred during processing of request from ('127.0.0.1', 49658)
+Traceback (most recent call last):
+  File "C:\Users\Kanishka\AppData\Local\Programs\Python\Python311\Lib\socketserver.py", line 691, in process_request_thread
+    self.finish_request(request, client_address)
+  File "C:\Users\Kanishka\AppData\Local\Programs\Python\Python311\Lib\socketserver.py", line 361, in finish_request
+    self.RequestHandlerClass(request, client_address, self)
+  File "C:\Users\Kanishka\AppData\Local\Programs\Python\Python311\Lib\socketserver.py", line 755, in __init__
+    self.handle()
+  File "C:\Users\Kanishka\AppData\Local\Programs\Python\Python311\Lib\http\server.py", line 436, in handle
+    self.handle_one_request()
+  File "C:\Users\Kanishka\AppData\Local\Programs\Python\Python311\Lib\http\server.py", line 424, in handle_one_request
+    method()
+  File "C:\Users\Kanishka\Code\Gesture_chrome_extension\pipeline\mjpeg_server.py", line 72, in do_GET
+    self.wfile.write(b"Content-Type: image/jpeg\r\n\r\n")
+  File "C:\Users\Kanishka\AppData\Local\Programs\Python\Python311\Lib\socketserver.py", line 834, in write
+    self._sock.sendall(b)
+ConnectionAbortedError: [WinError 10053] An established connection was aborted by the software in your host machine
+----------------------------------------
+23:01:45 [INFO] main: [ACT] tab_new                    gesture=INDEX_ONLY      hand=Right   cmd=KEYBOARD_SHORTCUT     ok=True  clients=1
+----------------------------------------
+Exception occurred during processing of request from ('127.0.0.1', 54469)
+Traceback (most recent call last):
+  File "C:\Users\Kanishka\AppData\Local\Programs\Python\Python311\Lib\socketserver.py", line 691, in process_request_thread
+    self.finish_request(request, client_address)
+  File "C:\Users\Kanishka\AppData\Local\Programs\Python\Python311\Lib\socketserver.py", line 361, in finish_request
+    self.RequestHandlerClass(request, client_address, self)
+  File "C:\Users\Kanishka\AppData\Local\Programs\Python\Python311\Lib\socketserver.py", line 755, in __init__
+    self.handle()
+  File "C:\Users\Kanishka\AppData\Local\Programs\Python\Python311\Lib\http\server.py", line 436, in handle
+    self.handle_one_request()
+  File "C:\Users\Kanishka\AppData\Local\Programs\Python\Python311\Lib\http\server.py", line 424, in handle_one_request
+    method()
+  File "C:\Users\Kanishka\Code\Gesture_chrome_extension\pipeline\mjpeg_server.py", line 72, in do_GET
+    self.wfile.write(b"Content-Type: image/jpeg\r\n\r\n")
+  File "C:\Users\Kanishka\AppData\Local\Programs\Python\Python311\Lib\socketserver.py", line 834, in write
+    self._sock.sendall(b)
+ConnectionAbortedError: [WinError 10053] An established connection was aborted by the software in your host machine
+----------------------------------------
+23:01:45 [INFO] pipeline.gesture_router: Multiplier locked: Right hand â†’ 1 fingers
+23:01:45 [INFO] pipeline.gesture_router: Multiplier released: Right hand
+23:01:45 [INFO] main: [ACT] window_minimize            gesture=SWIPE_DOWN      hand=Right   cmd=MINIMIZE_WINDOW       ok=True  clients=1
+23:01:48 [INFO] main: [ACT] tab_close                  gesture=PALM            hand=Left    cmd=KEYBOARD_SHORTCUT     ok=True  clients=1
+23:01:49 [INFO] main: [ACT] tab_close                  gesture=PALM            hand=Right   cmd=KEYBOARD_SHORTCUT     ok=True  clients=1
+23:01:49 [INFO] pipeline.websocket_server: Client disconnected: ::1:53073  (total: 0)
+23:01:54 [INFO] main: [ACT] tab_new                    gesture=INDEX_ONLY      hand=Left    cmd=KEYBOARD_SHORTCUT     ok=True  clients=0
+23:01:54 [INFO] main: [ACT] window_minimize            gesture=SWIPE_DOWN      hand=Left    cmd=MINIMIZE_WINDOW       ok=True  clients=0
+23:01:54 [INFO] main: [ACT] tab_new                    gesture=INDEX_ONLY      hand=Left    cmd=KEYBOARD_SHORTCUT     ok=True  clients=0
+23:01:56 [INFO] main: [ACT] window_minimize            gesture=SWIPE_DOWN      hand=Left    cmd=MINIMIZE_WINDOW       ok=True  clients=0
+23:01:56 [INFO] main: [ACT] tab_new                    gesture=INDEX_ONLY      hand=Left    cmd=KEYBOARD_SHORTCUT     ok=True  clients=0
+23:01:58 [INFO] websockets.server: connection open
+23:01:58 [INFO] pipeline.websocket_server: Client connected: ::1:64404  (total: 1)
+23:01:58 [INFO] main: [ACT] tab_new                    gesture=INDEX_ONLY      hand=Left    cmd=KEYBOARD_SHORTCUT     ok=True  clients=1
+23:02:03 [INFO] pipeline.websocket_server: Client disconnected: ::1:64404  (total: 0)
+23:03:45 [INFO] main: Starting GestureSelect pipeline...
+23:03:45 [INFO] pipeline.config_manager: Config loaded from gestures_config_v2.json
+23:03:45 [INFO] pipeline.config_manager: Config file watcher started.
+23:03:45 [INFO] pipeline.task_mapper: GestureTaskMapper initialised.
+23:03:45 [INFO] pipeline.mediapipe_detection: MediaPipe Hands initialised.
+23:03:45 [INFO] Mapping.action_executor_v2: ActionExecutor initialized for windows
+23:03:45 [INFO] pipeline.websocket_server: WebSocket server starting on ws://localhost:8765
+INFO: Created TensorFlow Lite XNNPACK delegate for CPU.
+23:03:45 [INFO] websockets.server: server listening on [::1]:8765
+23:03:45 [INFO] websockets.server: server listening on 127.0.0.1:8765
+23:03:45 [INFO] pipeline.websocket_server: WebSocket server live on ws://localhost:8765
+23:03:45 [INFO] pipeline.mjpeg_server: MJPEG stream: http://localhost:8767/stream
+23:03:45 [INFO] control_server: Control server: http://localhost:8766
+23:03:47 [INFO] websockets.server: connection open
+23:03:47 [INFO] pipeline.websocket_server: Client connected: ::1:60627  (total: 1)
+23:04:09 [INFO] main: Camera opened: 1280×720
+23:04:09 [INFO] main: WebSocket: ws://localhost:8765
+23:04:09 [INFO] main: Pipeline running. Press 'q' to quit.
+----------------------------------------
+Exception occurred during processing of request from ('127.0.0.1', 49745)
+Traceback (most recent call last):
+  File "C:\Users\Kanishka\AppData\Local\Programs\Python\Python311\Lib\socketserver.py", line 691, in process_request_thread
+    self.finish_request(request, client_address)
+  File "C:\Users\Kanishka\AppData\Local\Programs\Python\Python311\Lib\socketserver.py", line 361, in finish_request
+    self.RequestHandlerClass(request, client_address, self)
+  File "C:\Users\Kanishka\AppData\Local\Programs\Python\Python311\Lib\socketserver.py", line 755, in __init__
+    self.handle()
+  File "C:\Users\Kanishka\AppData\Local\Programs\Python\Python311\Lib\http\server.py", line 436, in handle
+    self.handle_one_request()
+  File "C:\Users\Kanishka\AppData\Local\Programs\Python\Python311\Lib\http\server.py", line 424, in handle_one_request
+    method()
+  File "C:\Users\Kanishka\Code\Gesture_chrome_extension\pipeline\mjpeg_server.py", line 72, in do_GET
+    self.wfile.write(b"Content-Type: image/jpeg\r\n\r\n")
+  File "C:\Users\Kanishka\AppData\Local\Programs\Python\Python311\Lib\socketserver.py", line 834, in write
+    self._sock.sendall(b)
+ConnectionAbortedError: [WinError 10053] An established connection was aborted by the software in your host machine
+----------------------------------------
+----------------------------------------
+Exception occurred during processing of request from ('127.0.0.1', 52529)
+Traceback (most recent call last):
+  File "C:\Users\Kanishka\AppData\Local\Programs\Python\Python311\Lib\socketserver.py", line 691, in process_request_thread
+    self.finish_request(request, client_address)
+  File "C:\Users\Kanishka\AppData\Local\Programs\Python\Python311\Lib\socketserver.py", line 361, in finish_request
+    self.RequestHandlerClass(request, client_address, self)
+  File "C:\Users\Kanishka\AppData\Local\Programs\Python\Python311\Lib\socketserver.py", line 755, in __init__
+    self.handle()
+  File "C:\Users\Kanishka\AppData\Local\Programs\Python\Python311\Lib\http\server.py", line 436, in handle
+    self.handle_one_request()
+  File "C:\Users\Kanishka\AppData\Local\Programs\Python\Python311\Lib\http\server.py", line 424, in handle_one_request
+    method()
+  File "C:\Users\Kanishka\Code\Gesture_chrome_extension\pipeline\mjpeg_server.py", line 72, in do_GET
+    self.wfile.write(b"Content-Type: image/jpeg\r\n\r\n")
+  File "C:\Users\Kanishka\AppData\Local\Programs\Python\Python311\Lib\socketserver.py", line 834, in write
+    self._sock.sendall(b)
+ConnectionAbortedError: [WinError 10053] An established connection was aborted by the software in your host machine
+----------------------------------------
+23:04:17 [INFO] pipeline.websocket_server: Client disconnected: ::1:60627  (total: 0)
+23:05:38 [INFO] main: Starting GestureSelect pipeline...
+23:05:38 [INFO] pipeline.config_manager: Config loaded from gestures_config_v2.json
+23:05:38 [INFO] pipeline.config_manager: Config file watcher started.
+23:05:38 [INFO] pipeline.task_mapper: GestureTaskMapper initialised.
+23:05:38 [INFO] pipeline.mediapipe_detection: MediaPipe Hands initialised.
+23:05:38 [INFO] Mapping.action_executor_v2: ActionExecutor initialized for windows
+23:05:38 [INFO] pipeline.websocket_server: WebSocket server starting on ws://localhost:8765
+INFO: Created TensorFlow Lite XNNPACK delegate for CPU.
+23:05:38 [INFO] websockets.server: server listening on [::1]:8765
+23:05:38 [INFO] websockets.server: server listening on 127.0.0.1:8765
+23:05:38 [INFO] pipeline.websocket_server: WebSocket server live on ws://localhost:8765
+23:05:38 [INFO] pipeline.mjpeg_server: MJPEG stream: http://localhost:8767/stream
+23:05:38 [INFO] control_server: Control server: http://localhost:8766
+23:05:39 [INFO] websockets.server: connection open
+23:05:39 [INFO] pipeline.websocket_server: Client connected: ::1:61441  (total: 1)
+23:06:01 [INFO] main: Camera opened: 1280×720
+23:06:01 [INFO] main: WebSocket: ws://localhost:8765
+23:06:01 [INFO] main: Pipeline running. Press 'q' to quit.
+23:06:06 [INFO] main: [ACT] tab_close                  gesture=PALM            hand=Right   cmd=KEYBOARD_SHORTCUT     ok=True  clients=1
+----------------------------------------
+Exception occurred during processing of request from ('127.0.0.1', 63922)
+Traceback (most recent call last):
+  File "C:\Users\Kanishka\AppData\Local\Programs\Python\Python311\Lib\socketserver.py", line 691, in process_request_thread
+    self.finish_request(request, client_address)
+  File "C:\Users\Kanishka\AppData\Local\Programs\Python\Python311\Lib\socketserver.py", line 361, in finish_request
+    self.RequestHandlerClass(request, client_address, self)
+  File "C:\Users\Kanishka\AppData\Local\Programs\Python\Python311\Lib\socketserver.py", line 755, in __init__
+    self.handle()
+  File "C:\Users\Kanishka\AppData\Local\Programs\Python\Python311\Lib\http\server.py", line 436, in handle
+    self.handle_one_request()
+  File "C:\Users\Kanishka\AppData\Local\Programs\Python\Python311\Lib\http\server.py", line 424, in handle_one_request
+    method()
+  File "C:\Users\Kanishka\Code\Gesture_chrome_extension\pipeline\mjpeg_server.py", line 72, in do_GET
+    self.wfile.write(b"Content-Type: image/jpeg\r\n\r\n")
+  File "C:\Users\Kanishka\AppData\Local\Programs\Python\Python311\Lib\socketserver.py", line 834, in write
+    self._sock.sendall(b)
+ConnectionAbortedError: [WinError 10053] An established connection was aborted by the software in your host machine
+----------------------------------------
+23:06:10 [INFO] main: [ACT] tab_new                    gesture=INDEX_ONLY      hand=Right   cmd=KEYBOARD_SHORTCUT     ok=True  clients=1
+----------------------------------------
+Exception occurred during processing of request from ('127.0.0.1', 63962)
+Traceback (most recent call last):
+  File "C:\Users\Kanishka\AppData\Local\Programs\Python\Python311\Lib\socketserver.py", line 691, in process_request_thread
+    self.finish_request(request, client_address)
+  File "C:\Users\Kanishka\AppData\Local\Programs\Python\Python311\Lib\socketserver.py", line 361, in finish_request
+    self.RequestHandlerClass(request, client_address, self)
+  File "C:\Users\Kanishka\AppData\Local\Programs\Python\Python311\Lib\socketserver.py", line 755, in __init__
+    self.handle()
+  File "C:\Users\Kanishka\AppData\Local\Programs\Python\Python311\Lib\http\server.py", line 436, in handle
+    self.handle_one_request()
+  File "C:\Users\Kanishka\AppData\Local\Programs\Python\Python311\Lib\http\server.py", line 424, in handle_one_request
+    method()
+  File "C:\Users\Kanishka\Code\Gesture_chrome_extension\pipeline\mjpeg_server.py", line 72, in do_GET
+    self.wfile.write(b"Content-Type: image/jpeg\r\n\r\n")
+  File "C:\Users\Kanishka\AppData\Local\Programs\Python\Python311\Lib\socketserver.py", line 834, in write
+    self._sock.sendall(b)
+ConnectionAbortedError: [WinError 10053] An established connection was aborted by the software in your host machine
+----------------------------------------
+23:06:11 [INFO] main: [ACT] window_maximize            gesture=SWIPE_UP        hand=Right   cmd=MAXIMIZE_WINDOW       ok=True  clients=1
+23:06:12 [INFO] main: [ACT] tab_close                  gesture=PALM            hand=Right   cmd=KEYBOARD_SHORTCUT     ok=True  clients=1
+23:06:12 [INFO] main: [ACT] fullscreen_toggle          gesture=THUMBS_UP       hand=Right   cmd=KEYBOARD_SHORTCUT     ok=True  clients=1
+23:06:12 [INFO] main: [ACT] tab_close                  gesture=PALM            hand=Left    cmd=KEYBOARD_SHORTCUT     ok=True  clients=1
+23:06:12 [INFO] pipeline.websocket_server: Client disconnected: ::1:61441  (total: 0)
+23:06:18 [INFO] main: [ACT] fullscreen_toggle          gesture=THUMBS_UP       hand=Right   cmd=KEYBOARD_SHORTCUT     ok=True  clients=0
+23:06:19 [INFO] websockets.server: connection open
+23:06:19 [INFO] pipeline.websocket_server: Client connected: ::1:60531  (total: 1)
+23:06:19 [INFO] main: [ACT] tab_new                    gesture=INDEX_ONLY      hand=Left    cmd=KEYBOARD_SHORTCUT     ok=True  clients=1
+23:06:19 [INFO] main: [ACT] tab_close                  gesture=FIST            hand=Left    cmd=KEYBOARD_SHORTCUT     ok=True  clients=1
+23:06:19 [INFO] main: [ACT] fullscreen_toggle          gesture=THUMBS_UP       hand=Left    cmd=KEYBOARD_SHORTCUT     ok=True  clients=1
+23:06:21 [INFO] pipeline.websocket_server: Client disconnected: ::1:60531  (total: 0)
+23:09:58 [INFO] main: Starting GestureSelect pipeline...
+23:09:58 [INFO] pipeline.config_manager: Config loaded from gestures_config_v2.json
+23:09:58 [INFO] pipeline.config_manager: Config file watcher started.
+23:09:58 [INFO] pipeline.task_mapper: GestureTaskMapper initialised.
+23:09:58 [INFO] pipeline.mediapipe_detection: MediaPipe Hands initialised.
+23:09:58 [INFO] Mapping.action_executor_v2: ActionExecutor initialized for windows
+23:09:58 [INFO] pipeline.websocket_server: WebSocket server starting on ws://localhost:8765
+INFO: Created TensorFlow Lite XNNPACK delegate for CPU.
+23:09:58 [INFO] pipeline.mjpeg_server: MJPEG stream: http://localhost:8767/stream
+23:09:58 [INFO] websockets.server: server listening on [::1]:8765
+23:09:58 [INFO] websockets.server: server listening on 127.0.0.1:8765
+23:09:58 [INFO] pipeline.websocket_server: WebSocket server live on ws://localhost:8765
+23:09:58 [INFO] control_server: Control server: http://localhost:8766
+23:09:59 [INFO] websockets.server: connection open
+23:09:59 [INFO] pipeline.websocket_server: Client connected: ::1:62208  (total: 1)
+23:10:22 [INFO] main: Camera opened: 1280×720
+23:10:22 [INFO] main: WebSocket: ws://localhost:8765
+23:10:22 [INFO] main: Pipeline running. Press 'q' to quit.
+----------------------------------------
+----------------------------------------
+Exception occurred during processing of request from ('127.0.0.1', 64658)
+Exception occurred during processing of request from ('127.0.0.1', 58178)
+Traceback (most recent call last):
+  File "C:\Users\Kanishka\AppData\Local\Programs\Python\Python311\Lib\socketserver.py", line 691, in process_request_thread
+    self.finish_request(request, client_address)
+  File "C:\Users\Kanishka\AppData\Local\Programs\Python\Python311\Lib\socketserver.py", line 361, in finish_request
+    self.RequestHandlerClass(request, client_address, self)
+  File "C:\Users\Kanishka\AppData\Local\Programs\Python\Python311\Lib\socketserver.py", line 755, in __init__
+    self.handle()
+  File "C:\Users\Kanishka\AppData\Local\Programs\Python\Python311\Lib\http\server.py", line 436, in handle
+    self.handle_one_request()
+  File "C:\Users\Kanishka\AppData\Local\Programs\Python\Python311\Lib\http\server.py", line 424, in handle_one_request
+    method()
+  File "C:\Users\Kanishka\Code\Gesture_chrome_extension\pipeline\mjpeg_server.py", line 72, in do_GET
+    self.wfile.write(b"Content-Type: image/jpeg\r\n\r\n")
+  File "C:\Users\Kanishka\AppData\Local\Programs\Python\Python311\Lib\socketserver.py", line 834, in write
+    self._sock.sendall(b)
+Traceback (most recent call last):
+ConnectionAbortedError: [WinError 10053] An established connection was aborted by the software in your host machine
+  File "C:\Users\Kanishka\AppData\Local\Programs\Python\Python311\Lib\socketserver.py", line 691, in process_request_thread
+    self.finish_request(request, client_address)
+  File "C:\Users\Kanishka\AppData\Local\Programs\Python\Python311\Lib\socketserver.py", line 361, in finish_request
+    self.RequestHandlerClass(request, client_address, self)
+----------------------------------------
+  File "C:\Users\Kanishka\AppData\Local\Programs\Python\Python311\Lib\socketserver.py", line 755, in __init__
+    self.handle()
+  File "C:\Users\Kanishka\AppData\Local\Programs\Python\Python311\Lib\http\server.py", line 436, in handle
+    self.handle_one_request()
+  File "C:\Users\Kanishka\AppData\Local\Programs\Python\Python311\Lib\http\server.py", line 424, in handle_one_request
+    method()
+  File "C:\Users\Kanishka\Code\Gesture_chrome_extension\pipeline\mjpeg_server.py", line 72, in do_GET
+    self.wfile.write(b"Content-Type: image/jpeg\r\n\r\n")
+  File "C:\Users\Kanishka\AppData\Local\Programs\Python\Python311\Lib\socketserver.py", line 834, in write
+    self._sock.sendall(b)
+ConnectionAbortedError: [WinError 10053] An established connection was aborted by the software in your host machine
+----------------------------------------
+23:10:27 [INFO] main: [ACT] tab_close                  gesture=PALM            hand=Right   cmd=KEYBOARD_SHORTCUT     ok=True  clients=1
+23:10:27 [INFO] pipeline.websocket_server: Client disconnected: ::1:62208  (total: 0)
+----------------------------------------
+Exception occurred during processing of request from ('127.0.0.1', 56900)
+Traceback (most recent call last):
+  File "C:\Users\Kanishka\AppData\Local\Programs\Python\Python311\Lib\socketserver.py", line 691, in process_request_thread
+    self.finish_request(request, client_address)
+  File "C:\Users\Kanishka\AppData\Local\Programs\Python\Python311\Lib\socketserver.py", line 361, in finish_request
+    self.RequestHandlerClass(request, client_address, self)
+  File "C:\Users\Kanishka\AppData\Local\Programs\Python\Python311\Lib\socketserver.py", line 755, in __init__
+    self.handle()
+  File "C:\Users\Kanishka\AppData\Local\Programs\Python\Python311\Lib\http\server.py", line 436, in handle
+    self.handle_one_request()
+  File "C:\Users\Kanishka\AppData\Local\Programs\Python\Python311\Lib\http\server.py", line 424, in handle_one_request
+    method()
+  File "C:\Users\Kanishka\Code\Gesture_chrome_extension\pipeline\mjpeg_server.py", line 72, in do_GET
+    self.wfile.write(b"Content-Type: image/jpeg\r\n\r\n")
+  File "C:\Users\Kanishka\AppData\Local\Programs\Python\Python311\Lib\socketserver.py", line 834, in write
+    self._sock.sendall(b)
+ConnectionAbortedError: [WinError 10053] An established connection was aborted by the software in your host machine
+----------------------------------------
+23:10:27 [INFO] main: [ACT] fullscreen_toggle          gesture=THUMBS_UP       hand=Right   cmd=KEYBOARD_SHORTCUT     ok=True  clients=0
+23:10:32 [INFO] websockets.server: connection open
+23:10:32 [INFO] pipeline.websocket_server: Client connected: ::1:51800  (total: 1)
+----------------------------------------
+Exception occurred during processing of request from ('127.0.0.1', 59123)
+Traceback (most recent call last):
+  File "C:\Users\Kanishka\AppData\Local\Programs\Python\Python311\Lib\socketserver.py", line 691, in process_request_thread
+    self.finish_request(request, client_address)
+  File "C:\Users\Kanishka\AppData\Local\Programs\Python\Python311\Lib\socketserver.py", line 361, in finish_request
+    self.RequestHandlerClass(request, client_address, self)
+  File "C:\Users\Kanishka\AppData\Local\Programs\Python\Python311\Lib\socketserver.py", line 755, in __init__
+    self.handle()
+  File "C:\Users\Kanishka\AppData\Local\Programs\Python\Python311\Lib\http\server.py", line 436, in handle
+    self.handle_one_request()
+  File "C:\Users\Kanishka\AppData\Local\Programs\Python\Python311\Lib\http\server.py", line 424, in handle_one_request
+    method()
+  File "C:\Users\Kanishka\Code\Gesture_chrome_extension\pipeline\mjpeg_server.py", line 72, in do_GET
+    self.wfile.write(b"Content-Type: image/jpeg\r\n\r\n")
+  File "C:\Users\Kanishka\AppData\Local\Programs\Python\Python311\Lib\socketserver.py", line 834, in write
+    self._sock.sendall(b)
+ConnectionAbortedError: [WinError 10053] An established connection was aborted by the software in your host machine
+----------------------------------------
+23:10:39 [INFO] main: [ACT] tab_new                    gesture=INDEX_ONLY      hand=Right   cmd=KEYBOARD_SHORTCUT     ok=True  clients=1
+----------------------------------------
+Exception occurred during processing of request from ('127.0.0.1', 60558)
+Traceback (most recent call last):
+  File "C:\Users\Kanishka\AppData\Local\Programs\Python\Python311\Lib\socketserver.py", line 691, in process_request_thread
+    self.finish_request(request, client_address)
+  File "C:\Users\Kanishka\AppData\Local\Programs\Python\Python311\Lib\socketserver.py", line 361, in finish_request
+    self.RequestHandlerClass(request, client_address, self)
+  File "C:\Users\Kanishka\AppData\Local\Programs\Python\Python311\Lib\socketserver.py", line 755, in __init__
+    self.handle()
+  File "C:\Users\Kanishka\AppData\Local\Programs\Python\Python311\Lib\http\server.py", line 436, in handle
+    self.handle_one_request()
+  File "C:\Users\Kanishka\AppData\Local\Programs\Python\Python311\Lib\http\server.py", line 424, in handle_one_request
+    method()
+  File "C:\Users\Kanishka\Code\Gesture_chrome_extension\pipeline\mjpeg_server.py", line 72, in do_GET
+    self.wfile.write(b"Content-Type: image/jpeg\r\n\r\n")
+  File "C:\Users\Kanishka\AppData\Local\Programs\Python\Python311\Lib\socketserver.py", line 834, in write
+    self._sock.sendall(b)
+ConnectionAbortedError: [WinError 10053] An established connection was aborted by the software in your host machine
+----------------------------------------
+23:10:40 [INFO] main: [ACT] window_minimize            gesture=SWIPE_DOWN      hand=Right   cmd=MINIMIZE_WINDOW       ok=True  clients=1
+23:10:43 [INFO] main: [ACT] refresh_page               gesture=PEACE           hand=Right   cmd=KEYBOARD_SHORTCUT     ok=True  clients=1
+23:10:43 [INFO] main: [ACT] cursor_move                gesture=PEACE           hand=Right   cmd=N/A                   ok=False  clients=1
+23:10:44 [INFO] pipeline.gesture_router: Tab swipe: Left hand, 2f Ã— 1x = 2 tabs
+23:10:44 [INFO] main: [ACT] tab_switch_right           gesture=SWIPE_RIGHT     hand=Left    cmd=KEYBOARD_SHORTCUT     ok=True  clients=1
+23:10:45 [INFO] main: [ACT] tab_new                    gesture=INDEX_ONLY      hand=Left    cmd=KEYBOARD_SHORTCUT     ok=True  clients=1
+23:10:58 [INFO] main: [ACT] tab_close                  gesture=PALM            hand=Left    cmd=KEYBOARD_SHORTCUT     ok=True  clients=1
+----------------------------------------
+Exception occurred during processing of request from ('127.0.0.1', 58742)
+Traceback (most recent call last):
+  File "C:\Users\Kanishka\AppData\Local\Programs\Python\Python311\Lib\socketserver.py", line 691, in process_request_thread
+    self.finish_request(request, client_address)
+  File "C:\Users\Kanishka\AppData\Local\Programs\Python\Python311\Lib\socketserver.py", line 361, in finish_request
+    self.RequestHandlerClass(request, client_address, self)
+  File "C:\Users\Kanishka\AppData\Local\Programs\Python\Python311\Lib\socketserver.py", line 755, in __init__
+    self.handle()
+  File "C:\Users\Kanishka\AppData\Local\Programs\Python\Python311\Lib\http\server.py", line 436, in handle
+    self.handle_one_request()
+  File "C:\Users\Kanishka\AppData\Local\Programs\Python\Python311\Lib\http\server.py", line 424, in handle_one_request
+    method()
+  File "C:\Users\Kanishka\Code\Gesture_chrome_extension\pipeline\mjpeg_server.py", line 72, in do_GET
+    self.wfile.write(b"Content-Type: image/jpeg\r\n\r\n")
+  File "C:\Users\Kanishka\AppData\Local\Programs\Python\Python311\Lib\socketserver.py", line 834, in write
+    self._sock.sendall(b)
+ConnectionAbortedError: [WinError 10053] An established connection was aborted by the software in your host machine
+----------------------------------------
+23:11:02 [INFO] pipeline.websocket_server: Client disconnected: ::1:51800  (total: 0)
+23:17:05 [INFO] main: Starting GestureSelect pipeline...
+23:17:05 [INFO] pipeline.config_manager: Config loaded from gestures_config_v2.json
+23:17:05 [INFO] pipeline.config_manager: Config file watcher started.
+23:17:05 [INFO] pipeline.task_mapper: GestureTaskMapper initialised.
+23:17:05 [INFO] pipeline.mediapipe_detection: MediaPipe Hands initialised.
+23:17:05 [INFO] Mapping.action_executor_v2: ActionExecutor initialized for windows
+23:17:05 [INFO] pipeline.websocket_server: WebSocket server starting on ws://localhost:8765
+INFO: Created TensorFlow Lite XNNPACK delegate for CPU.
+23:17:05 [INFO] websockets.server: server listening on [::1]:8765
+23:17:05 [INFO] websockets.server: server listening on 127.0.0.1:8765
+23:17:05 [INFO] pipeline.websocket_server: WebSocket server live on ws://localhost:8765
+23:17:05 [INFO] pipeline.mjpeg_server: MJPEG stream: http://localhost:8767/stream
+23:17:05 [INFO] control_server: Control server: http://localhost:8766
+23:17:06 [INFO] websockets.server: connection open
+23:17:06 [INFO] pipeline.websocket_server: Client connected: ::1:52531  (total: 1)
+23:17:28 [INFO] main: Camera opened: 1280×720
+23:17:28 [INFO] main: WebSocket: ws://localhost:8765
+23:17:28 [INFO] main: Pipeline running. Press 'q' to quit.
+----------------------------------------
+----------------------------------------
+Exception occurred during processing of request from ('127.0.0.1', 63360)
+Exception occurred during processing of request from ('127.0.0.1', 56607)
+Traceback (most recent call last):
+  File "C:\Users\Kanishka\AppData\Local\Programs\Python\Python311\Lib\socketserver.py", line 691, in process_request_thread
+    self.finish_request(request, client_address)
+  File "C:\Users\Kanishka\AppData\Local\Programs\Python\Python311\Lib\socketserver.py", line 361, in finish_request
+    self.RequestHandlerClass(request, client_address, self)
+  File "C:\Users\Kanishka\AppData\Local\Programs\Python\Python311\Lib\socketserver.py", line 755, in __init__
+    self.handle()
+  File "C:\Users\Kanishka\AppData\Local\Programs\Python\Python311\Lib\http\server.py", line 436, in handle
+    self.handle_one_request()
+  File "C:\Users\Kanishka\AppData\Local\Programs\Python\Python311\Lib\http\server.py", line 424, in handle_one_request
+    method()
+  File "C:\Users\Kanishka\Code\Gesture_chrome_extension\pipeline\mjpeg_server.py", line 72, in do_GET
+    self.wfile.write(b"Content-Type: image/jpeg\r\n\r\n")
+  File "C:\Users\Kanishka\AppData\Local\Programs\Python\Python311\Lib\socketserver.py", line 834, in write
+    self._sock.sendall(b)
+Traceback (most recent call last):
+ConnectionAbortedError: [WinError 10053] An established connection was aborted by the software in your host machine
+  File "C:\Users\Kanishka\AppData\Local\Programs\Python\Python311\Lib\socketserver.py", line 691, in process_request_thread
+    self.finish_request(request, client_address)
+----------------------------------------
+  File "C:\Users\Kanishka\AppData\Local\Programs\Python\Python311\Lib\socketserver.py", line 361, in finish_request
+    self.RequestHandlerClass(request, client_address, self)
+  File "C:\Users\Kanishka\AppData\Local\Programs\Python\Python311\Lib\socketserver.py", line 755, in __init__
+    self.handle()
+  File "C:\Users\Kanishka\AppData\Local\Programs\Python\Python311\Lib\http\server.py", line 436, in handle
+    self.handle_one_request()
+  File "C:\Users\Kanishka\AppData\Local\Programs\Python\Python311\Lib\http\server.py", line 424, in handle_one_request
+    method()
+  File "C:\Users\Kanishka\Code\Gesture_chrome_extension\pipeline\mjpeg_server.py", line 72, in do_GET
+    self.wfile.write(b"Content-Type: image/jpeg\r\n\r\n")
+  File "C:\Users\Kanishka\AppData\Local\Programs\Python\Python311\Lib\socketserver.py", line 834, in write
+    self._sock.sendall(b)
+ConnectionAbortedError: [WinError 10053] An established connection was aborted by the software in your host machine
+----------------------------------------
+----------------------------------------
+Exception occurred during processing of request from ('127.0.0.1', 64209)
+Traceback (most recent call last):
+  File "C:\Users\Kanishka\AppData\Local\Programs\Python\Python311\Lib\socketserver.py", line 691, in process_request_thread
+    self.finish_request(request, client_address)
+  File "C:\Users\Kanishka\AppData\Local\Programs\Python\Python311\Lib\socketserver.py", line 361, in finish_request
+    self.RequestHandlerClass(request, client_address, self)
+  File "C:\Users\Kanishka\AppData\Local\Programs\Python\Python311\Lib\socketserver.py", line 755, in __init__
+    self.handle()
+  File "C:\Users\Kanishka\AppData\Local\Programs\Python\Python311\Lib\http\server.py", line 436, in handle
+    self.handle_one_request()
+  File "C:\Users\Kanishka\AppData\Local\Programs\Python\Python311\Lib\http\server.py", line 424, in handle_one_request
+    method()
+  File "C:\Users\Kanishka\Code\Gesture_chrome_extension\pipeline\mjpeg_server.py", line 72, in do_GET
+    self.wfile.write(b"Content-Type: image/jpeg\r\n\r\n")
+  File "C:\Users\Kanishka\AppData\Local\Programs\Python\Python311\Lib\socketserver.py", line 834, in write
+    self._sock.sendall(b)
+ConnectionAbortedError: [WinError 10053] An established connection was aborted by the software in your host machine
+----------------------------------------
+23:17:34 [INFO] pipeline.websocket_server: Client disconnected: ::1:52531  (total: 0)
+23:17:39 [INFO] websockets.server: connection open
+23:17:39 [INFO] pipeline.websocket_server: Client connected: ::1:54373  (total: 1)
+----------------------------------------
+Exception occurred during processing of request from ('127.0.0.1', 52808)
+Traceback (most recent call last):
+  File "C:\Users\Kanishka\AppData\Local\Programs\Python\Python311\Lib\socketserver.py", line 691, in process_request_thread
+    self.finish_request(request, client_address)
+  File "C:\Users\Kanishka\AppData\Local\Programs\Python\Python311\Lib\socketserver.py", line 361, in finish_request
+    self.RequestHandlerClass(request, client_address, self)
+  File "C:\Users\Kanishka\AppData\Local\Programs\Python\Python311\Lib\socketserver.py", line 755, in __init__
+    self.handle()
+  File "C:\Users\Kanishka\AppData\Local\Programs\Python\Python311\Lib\http\server.py", line 436, in handle
+    self.handle_one_request()
+  File "C:\Users\Kanishka\AppData\Local\Programs\Python\Python311\Lib\http\server.py", line 424, in handle_one_request
+    method()
+  File "C:\Users\Kanishka\Code\Gesture_chrome_extension\pipeline\mjpeg_server.py", line 72, in do_GET
+    self.wfile.write(b"Content-Type: image/jpeg\r\n\r\n")
+  File "C:\Users\Kanishka\AppData\Local\Programs\Python\Python311\Lib\socketserver.py", line 834, in write
+    self._sock.sendall(b)
+ConnectionAbortedError: [WinError 10053] An established connection was aborted by the software in your host machine
+----------------------------------------
+----------------------------------------
+Exception occurred during processing of request from ('127.0.0.1', 62543)
+Traceback (most recent call last):
+  File "C:\Users\Kanishka\AppData\Local\Programs\Python\Python311\Lib\socketserver.py", line 691, in process_request_thread
+    self.finish_request(request, client_address)
+  File "C:\Users\Kanishka\AppData\Local\Programs\Python\Python311\Lib\socketserver.py", line 361, in finish_request
+    self.RequestHandlerClass(request, client_address, self)
+  File "C:\Users\Kanishka\AppData\Local\Programs\Python\Python311\Lib\socketserver.py", line 755, in __init__
+    self.handle()
+  File "C:\Users\Kanishka\AppData\Local\Programs\Python\Python311\Lib\http\server.py", line 436, in handle
+    self.handle_one_request()
+  File "C:\Users\Kanishka\AppData\Local\Programs\Python\Python311\Lib\http\server.py", line 424, in handle_one_request
+    method()
+  File "C:\Users\Kanishka\Code\Gesture_chrome_extension\pipeline\mjpeg_server.py", line 72, in do_GET
+    self.wfile.write(b"Content-Type: image/jpeg\r\n\r\n")
+  File "C:\Users\Kanishka\AppData\Local\Programs\Python\Python311\Lib\socketserver.py", line 834, in write
+    self._sock.sendall(b)
+ConnectionAbortedError: [WinError 10053] An established connection was aborted by the software in your host machine
+----------------------------------------
+23:17:53 [INFO] pipeline.websocket_server: Client disconnected: ::1:54373  (total: 0)
+23:20:25 [INFO] main: Starting GestureSelect pipeline...
+23:20:25 [INFO] pipeline.config_manager: Config loaded from gestures_config_v2.json
+23:20:25 [INFO] pipeline.config_manager: Config file watcher started.
+23:20:25 [INFO] pipeline.task_mapper: GestureTaskMapper initialised.
+23:20:25 [INFO] pipeline.mediapipe_detection: MediaPipe Hands initialised.
+23:20:25 [INFO] Mapping.action_executor_v2: ActionExecutor initialized for windows
+23:20:25 [INFO] pipeline.websocket_server: WebSocket server starting on ws://localhost:8765
+INFO: Created TensorFlow Lite XNNPACK delegate for CPU.
+23:20:25 [INFO] websockets.server: server listening on [::1]:8765
+23:20:25 [INFO] pipeline.mjpeg_server: MJPEG stream: http://localhost:8767/stream
+23:20:25 [INFO] websockets.server: server listening on 127.0.0.1:8765
+23:20:25 [INFO] pipeline.websocket_server: WebSocket server live on ws://localhost:8765
+23:20:25 [INFO] control_server: Control server: http://localhost:8766
+23:20:27 [INFO] websockets.server: connection open
+23:20:27 [INFO] pipeline.websocket_server: Client connected: ::1:52374  (total: 1)
+23:20:51 [INFO] main: Camera opened: 1280×720
+23:20:51 [INFO] main: WebSocket: ws://localhost:8765
+23:20:51 [INFO] main: Pipeline running. Press 'q' to quit.
+----------------------------------------
+Exception occurred during processing of request from ('127.0.0.1', 52853)
+----------------------------------------
+Exception occurred during processing of request from ('127.0.0.1', 49536)
+Traceback (most recent call last):
+  File "C:\Users\Kanishka\AppData\Local\Programs\Python\Python311\Lib\socketserver.py", line 691, in process_request_thread
+    self.finish_request(request, client_address)
+  File "C:\Users\Kanishka\AppData\Local\Programs\Python\Python311\Lib\socketserver.py", line 361, in finish_request
+    self.RequestHandlerClass(request, client_address, self)
+  File "C:\Users\Kanishka\AppData\Local\Programs\Python\Python311\Lib\socketserver.py", line 755, in __init__
+    self.handle()
+  File "C:\Users\Kanishka\AppData\Local\Programs\Python\Python311\Lib\http\server.py", line 436, in handle
+    self.handle_one_request()
+Traceback (most recent call last):
+  File "C:\Users\Kanishka\AppData\Local\Programs\Python\Python311\Lib\http\server.py", line 424, in handle_one_request
+    method()
+  File "C:\Users\Kanishka\AppData\Local\Programs\Python\Python311\Lib\socketserver.py", line 691, in process_request_thread
+    self.finish_request(request, client_address)
+  File "C:\Users\Kanishka\Code\Gesture_chrome_extension\pipeline\mjpeg_server.py", line 72, in do_GET
+    self.wfile.write(b"Content-Type: image/jpeg\r\n\r\n")
+  File "C:\Users\Kanishka\AppData\Local\Programs\Python\Python311\Lib\socketserver.py", line 361, in finish_request
+    self.RequestHandlerClass(request, client_address, self)
+  File "C:\Users\Kanishka\AppData\Local\Programs\Python\Python311\Lib\socketserver.py", line 834, in write
+    self._sock.sendall(b)
+  File "C:\Users\Kanishka\AppData\Local\Programs\Python\Python311\Lib\socketserver.py", line 755, in __init__
+    self.handle()
+ConnectionAbortedError: [WinError 10053] An established connection was aborted by the software in your host machine
+  File "C:\Users\Kanishka\AppData\Local\Programs\Python\Python311\Lib\http\server.py", line 436, in handle
+    self.handle_one_request()
+  File "C:\Users\Kanishka\AppData\Local\Programs\Python\Python311\Lib\http\server.py", line 424, in handle_one_request
+    method()
+  File "C:\Users\Kanishka\Code\Gesture_chrome_extension\pipeline\mjpeg_server.py", line 72, in do_GET
+    self.wfile.write(b"Content-Type: image/jpeg\r\n\r\n")
+  File "C:\Users\Kanishka\AppData\Local\Programs\Python\Python311\Lib\socketserver.py", line 834, in write
+    self._sock.sendall(b)
+----------------------------------------
+ConnectionAbortedError: [WinError 10053] An established connection was aborted by the software in your host machine
+----------------------------------------
+23:20:53 [INFO] main: [ACT] tab_close                  gesture=FIST            hand=Left    cmd=KEYBOARD_SHORTCUT     ok=True  clients=1
+23:20:53 [INFO] main: [ACT] fullscreen_toggle          gesture=THUMBS_UP       hand=Left    cmd=KEYBOARD_SHORTCUT     ok=True  clients=1
+23:20:54 [INFO] pipeline.gesture_router: Multiplier locked: Left hand â†’ 1 fingers
+23:20:54 [INFO] main: [ACT] tab_close                  gesture=FIST            hand=Left    cmd=KEYBOARD_SHORTCUT     ok=True  clients=1
+23:20:54 [INFO] pipeline.websocket_server: Client disconnected: ::1:52374  (total: 0)
+23:20:55 [INFO] pipeline.gesture_router: Multiplier released: Left hand
+23:20:59 [INFO] main: No clients connected for 5 seconds. Shutting down pipeline.
+23:21:00 [ERROR] pipeline.websocket_server: WebSocket loop error: Event loop stopped before Future completed.
+23:21:00 [INFO] main: Pipeline shut down cleanly.
+23:21:00 [ERROR] asyncio: Task was destroyed but it is pending!
+task: <Task pending name='Task-5' coro=<IocpProactor.accept.<locals>.accept_coro() running at C:\Users\Kanishka\AppData\Local\Programs\Python\Python311\Lib\asyncio\windows_events.py:608> wait_for=<_OverlappedFuture cancelled>>
+23:21:00 [ERROR] asyncio: Task was destroyed but it is pending!
+task: <Task pending name='Task-4' coro=<IocpProactor.accept.<locals>.accept_coro() running at C:\Users\Kanishka\AppData\Local\Programs\Python\Python311\Lib\asyncio\windows_events.py:608> wait_for=<_OverlappedFuture cancelled>>
+Exception ignored in: <coroutine object WebSocketServer._serve at 0x000001F072A65030>
+Traceback (most recent call last):
+  File "C:\Users\Kanishka\Code\Gesture_chrome_extension\pipeline\websocket_server.py", line 149, in _serve
+    async with websockets.serve(
+  File "C:\Users\Kanishka\Code\Gesture_chrome_extension\venv\Lib\site-packages\websockets\asyncio\server.py", line 837, in __aexit__
+    self.server.close()
+  File "C:\Users\Kanishka\Code\Gesture_chrome_extension\venv\Lib\site-packages\websockets\asyncio\server.py", line 434, in close
+    self.close_task = self.get_loop().create_task(
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Kanishka\AppData\Local\Programs\Python\Python311\Lib\asyncio\base_events.py", line 435, in create_task
+    self._check_closed()
+  File "C:\Users\Kanishka\AppData\Local\Programs\Python\Python311\Lib\asyncio\base_events.py", line 520, in _check_closed
+    raise RuntimeError('Event loop is closed')
+RuntimeError: Event loop is closed
+sys:1: RuntimeWarning: coroutine 'Server._close' was never awaited
+RuntimeWarning: Enable tracemalloc to get the object allocation traceback
+23:21:06 [INFO] main: Starting GestureSelect pipeline...
+23:21:06 [INFO] pipeline.config_manager: Config loaded from gestures_config_v2.json
+23:21:06 [INFO] pipeline.config_manager: Config file watcher started.
+23:21:06 [INFO] pipeline.task_mapper: GestureTaskMapper initialised.
+23:21:06 [INFO] pipeline.mediapipe_detection: MediaPipe Hands initialised.
+23:21:06 [INFO] Mapping.action_executor_v2: ActionExecutor initialized for windows
+23:21:06 [INFO] pipeline.websocket_server: WebSocket server starting on ws://localhost:8765
+INFO: Created TensorFlow Lite XNNPACK delegate for CPU.
+23:21:06 [INFO] websockets.server: server listening on 127.0.0.1:8765
+23:21:06 [INFO] websockets.server: server listening on [::1]:8765
+23:21:06 [INFO] pipeline.websocket_server: WebSocket server live on ws://localhost:8765
+23:21:06 [INFO] pipeline.mjpeg_server: MJPEG stream: http://localhost:8767/stream
+23:21:06 [INFO] control_server: Control server: http://localhost:8766
+23:21:06 [INFO] websockets.server: connection open
+23:21:06 [INFO] pipeline.websocket_server: Client connected: ::1:49941  (total: 1)
+23:21:16 [INFO] pipeline.websocket_server: Client disconnected: ::1:49941  (total: 0)
+23:33:58 [INFO] main: Starting GestureSelect pipeline...
+23:33:58 [INFO] pipeline.config_manager: Config loaded from gestures_config_v2.json
+23:33:58 [INFO] pipeline.config_manager: Config file watcher started.
+23:33:58 [INFO] pipeline.task_mapper: GestureTaskMapper initialised.
+23:33:58 [INFO] pipeline.mediapipe_detection: MediaPipe Hands initialised.
+23:33:58 [INFO] Mapping.action_executor_v2: ActionExecutor initialized for windows
+23:33:58 [INFO] pipeline.websocket_server: WebSocket server starting on ws://localhost:8765
+INFO: Created TensorFlow Lite XNNPACK delegate for CPU.
+23:33:58 [INFO] pipeline.mjpeg_server: MJPEG stream: http://localhost:8767/stream
+23:33:58 [INFO] websockets.server: server listening on [::1]:8765
+23:33:58 [INFO] websockets.server: server listening on 127.0.0.1:8765
+23:33:58 [INFO] pipeline.websocket_server: WebSocket server live on ws://localhost:8765
+23:33:58 [INFO] control_server: Control server: http://localhost:8766
+23:34:13 [INFO] websockets.server: connection open
+23:34:13 [INFO] pipeline.websocket_server: Client connected: ::1:61800  (total: 1)
+23:34:25 [INFO] main: Camera opened: 1280×720
+23:34:25 [INFO] main: WebSocket: ws://localhost:8765
+23:34:25 [INFO] main: Pipeline running. Press 'q' to quit.
+23:34:44 [INFO] pipeline.gesture_router: Multiplier locked: Right hand â†’ 2 fingers
+23:34:44 [INFO] main: [ACT] tab_new                    gesture=INDEX_ONLY      hand=Right   cmd=KEYBOARD_SHORTCUT     ok=True  clients=1
+----------------------------------------
+Exception occurred during processing of request from ('127.0.0.1', 52395)
+Traceback (most recent call last):
+  File "C:\Users\Kanishka\AppData\Local\Programs\Python\Python311\Lib\socketserver.py", line 691, in process_request_thread
+    self.finish_request(request, client_address)
+  File "C:\Users\Kanishka\AppData\Local\Programs\Python\Python311\Lib\socketserver.py", line 361, in finish_request
+    self.RequestHandlerClass(request, client_address, self)
+  File "C:\Users\Kanishka\AppData\Local\Programs\Python\Python311\Lib\socketserver.py", line 755, in __init__
+    self.handle()
+  File "C:\Users\Kanishka\AppData\Local\Programs\Python\Python311\Lib\http\server.py", line 436, in handle
+    self.handle_one_request()
+  File "C:\Users\Kanishka\AppData\Local\Programs\Python\Python311\Lib\http\server.py", line 424, in handle_one_request
+    method()
+  File "C:\Users\Kanishka\Code\Gesture_chrome_extension\pipeline\mjpeg_server.py", line 72, in do_GET
+    self.wfile.write(b"Content-Type: image/jpeg\r\n\r\n")
+  File "C:\Users\Kanishka\AppData\Local\Programs\Python\Python311\Lib\socketserver.py", line 834, in write
+    self._sock.sendall(b)
+ConnectionAbortedError: [WinError 10053] An established connection was aborted by the software in your host machine
+----------------------------------------
+23:34:46 [INFO] pipeline.gesture_router: Multiplier released: Right hand
+23:34:47 [INFO] main: [ACT] tab_new                    gesture=INDEX_ONLY      hand=Right   cmd=KEYBOARD_SHORTCUT     ok=True  clients=1
+23:34:47 [INFO] pipeline.gesture_router: Multiplier locked: Right hand â†’ 1 fingers
+23:34:50 [INFO] pipeline.gesture_router: Multiplier released: Right hand
+23:34:51 [INFO] main: [ACT] tab_close                  gesture=PALM            hand=Right   cmd=KEYBOARD_SHORTCUT     ok=True  clients=1
+23:34:51 [INFO] main: [ACT] window_maximize            gesture=SWIPE_UP        hand=Right   cmd=MAXIMIZE_WINDOW       ok=True  clients=1
+23:34:51 [INFO] pipeline.gesture_router: Multiplier locked: Right hand â†’ 5 fingers
+23:34:52 [INFO] main: [ACT] tab_close                  gesture=PALM            hand=Right   cmd=N/A                   ok=False  clients=1
+23:34:52 [INFO] pipeline.gesture_router: Multiplier released: Right hand
+23:34:52 [INFO] main: [ACT] window_minimize            gesture=SWIPE_DOWN      hand=Right   cmd=MINIMIZE_WINDOW       ok=True  clients=1
+23:34:57 [INFO] pipeline.gesture_router: Multiplier locked: Right hand â†’ 2 fingers
+23:34:57 [INFO] pipeline.gesture_router: Multiplier released: Right hand
+23:35:02 [INFO] main: [ACT] tab_new                    gesture=INDEX_ONLY      hand=Left    cmd=KEYBOARD_SHORTCUT     ok=True  clients=1
+----------------------------------------
+Exception occurred during processing of request from ('127.0.0.1', 52355)
+Traceback (most recent call last):
+  File "C:\Users\Kanishka\AppData\Local\Programs\Python\Python311\Lib\socketserver.py", line 691, in process_request_thread
+    self.finish_request(request, client_address)
+  File "C:\Users\Kanishka\AppData\Local\Programs\Python\Python311\Lib\socketserver.py", line 361, in finish_request
+    self.RequestHandlerClass(request, client_address, self)
+  File "C:\Users\Kanishka\AppData\Local\Programs\Python\Python311\Lib\socketserver.py", line 755, in __init__
+    self.handle()
+  File "C:\Users\Kanishka\AppData\Local\Programs\Python\Python311\Lib\http\server.py", line 436, in handle
+    self.handle_one_request()
+  File "C:\Users\Kanishka\AppData\Local\Programs\Python\Python311\Lib\http\server.py", line 424, in handle_one_request
+    method()
+  File "C:\Users\Kanishka\Code\Gesture_chrome_extension\pipeline\mjpeg_server.py", line 72, in do_GET
+    self.wfile.write(b"Content-Type: image/jpeg\r\n\r\n")
+  File "C:\Users\Kanishka\AppData\Local\Programs\Python\Python311\Lib\socketserver.py", line 834, in write
+    self._sock.sendall(b)
+ConnectionAbortedError: [WinError 10053] An established connection was aborted by the software in your host machine
+----------------------------------------
+23:35:03 [INFO] pipeline.gesture_router: Multiplier locked: Left hand â†’ 1 fingers
+23:35:03 [INFO] pipeline.gesture_router: Multiplier released: Left hand
+23:35:04 [INFO] main: [ACT] window_maximize            gesture=SWIPE_UP        hand=Left    cmd=MAXIMIZE_WINDOW       ok=True  clients=1
+23:35:07 [INFO] pipeline.websocket_server: Client disconnected: ::1:61800  (total: 0)

@@ -123,8 +123,10 @@ def run(args):
     logger.info(f"WebSocket: ws://{cfg.ws_host}:{cfg.ws_port}")
     logger.info("Pipeline running. Press 'q' to quit.")
 
-    #  Main loop
+    # ── Main loop ──
     fps_times: list[float] = []
+    zero_clients_start_time: float | None = None
+
     try:
         while not _stop_signal.is_set():
             ret, frame = cam.read()
@@ -132,6 +134,16 @@ def run(args):
                 logger.warning("Frame capture failed — retrying.")
                 time.sleep(0.05)
                 continue
+
+            # Auto-shutdown if Chrome is closed (0 clients for 5 seconds)
+            if server.client_count == 0:
+                if zero_clients_start_time is None:
+                    zero_clients_start_time = time.time()
+                elif time.time() - zero_clients_start_time > 5.0:
+                    logger.info("No clients connected for 5 seconds. Shutting down pipeline.")
+                    break
+            else:
+                zero_clients_start_time = None
 
             # 1. Detect gestures
             annotated, frame_result = detector.process_frame(frame)

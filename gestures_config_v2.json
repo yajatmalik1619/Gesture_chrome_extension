@@ -198,7 +198,7 @@
       "label": "Open Palm",
       "type": "static",
       "hand": "any",
-      "enabled": false,
+      "enabled": true,
       "description": "All fingers extended"
     },
     "THUMBS_UP": {
@@ -320,7 +320,7 @@
     "TWO_FISTS": "none",
     "DOUBLE_THUMBS_UP": "none",
     "HIGH_FIVE": "none",
-    "PALM": "refresh_page",
+    "PALM": "tab_close",
     "PEACE": "refresh_page",
     "OK": "none",
     "POINTING_UP": "none",

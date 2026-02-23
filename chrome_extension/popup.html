@@ -29,7 +29,7 @@
     }
 
     body {
-      width: 380px;
+      width: 557px;
       min-height: 200px;
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
       background: var(--bg);
@@ -73,7 +73,7 @@
     .panel {
       display: none;
       padding: 12px;
-      max-height: 540px;
+      max-height: 640px;
       overflow-y: auto;
     }
 
@@ -697,12 +697,17 @@
       border-radius: 8px;
       overflow: hidden;
       border: 1px solid var(--border);
-      min-height: 240px;
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      /* matches camera native ratio — no fixed height needed */
     }
 
     /* MJPEG stream from Python */
     .cam-container #cam-feed {
       width: 100%;
+      height: 100%;
+      object-fit: contain;
+      /* full frame visible, same ratio → no letterbox */
       display: block;
       border-radius: 7px;
     }
@@ -710,9 +715,11 @@
     /* Local getUserMedia feed */
     .cam-container #cam-local {
       width: 100%;
+      height: 100%;
+      object-fit: contain;
       display: block;
       transform: scaleX(-1);
-      /* Mirror effect */
+      /* mirror effect */
       border-radius: 7px;
       background: #000;
     }
@@ -730,7 +737,7 @@
     }
 
     .cam-badge {
-      font-size: 10px;
+      font-size: 13px;
       font-weight: 700;
       color: var(--green);
       background: rgba(0, 0, 0, 0.5);
@@ -740,7 +747,7 @@
     }
 
     .cam-gesture {
-      font-size: 10px;
+      font-size: 13px;
       color: #fff;
     }
 
@@ -749,7 +756,7 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      height: 240px;
+      height: 285px;
       gap: 8px;
       background: var(--surface);
       border-radius: 8px;
@@ -1090,9 +1097,6 @@
       <div class="cam-offline" id="cam-offline">
         <div class="cam-offline-icon">📷</div>
         <div class="cam-offline-text">Camera unavailable</div>
-        <!-- Source: https://stackoverflow.com/a/74132795 (CC BY-SA 4.0) -->
-        <button id="requestPermission" class="btn btn-sm btn-primary" style="margin-top:6px;">📷 Allow Camera
-          Access</button>
         <button class="btn btn-sm btn-start" id="cam-start-btn" style="margin-top:4px;">▶ Start Pipeline</button>
       </div>
     </div>
