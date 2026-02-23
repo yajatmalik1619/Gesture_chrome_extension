@@ -66,9 +66,9 @@ class ActionExecutor:
         else:
             return "linux"
 
-    # â”€â”€ Main Execution â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    # Main Execution
 
-    def execute(self, event: ActionEvent) -> ExecutionResult:
+  def execute(self, event: ActionEvent) -> ExecutionResult:
         """Execute an ActionEvent and return the result."""
         action_def = self.cfg.get_action(event.action_id)
         

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 capture_user_gestures.py
-────────────────────────
+4────────────────────────
 Efficient CLI tool for recording custom hand gestures.
 
 Usage:
