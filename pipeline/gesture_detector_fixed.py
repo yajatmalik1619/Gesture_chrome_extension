@@ -329,7 +329,7 @@ class GestureDetector:
 
     def _detect_custom(self, landmarks: np.ndarray) -> str:
         """Match landmarks against custom recorded samples."""
-        custom_gestures = self._cfg.get("custom_gestures", default={})
+        custom_gestures = self.cfg.get("custom_gestures", default={})
         if not custom_gestures:
             return "UNKNOWN"
             
