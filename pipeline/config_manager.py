@@ -61,6 +61,10 @@ class ConfigManager:
             json.dumps(data, indent=2, ensure_ascii=False),
             encoding="utf-8"
         )
+        # Update _last_mtime so the file watcher doesn't treat our own
+        # save() as an external change and trigger a redundant _load().
+        with self._lock:
+            self._last_mtime = self._path.stat().st_mtime
         logger.info("Config saved.")
 
     # ── File Watcher ───────────────────────────────────────────────────────────

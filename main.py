@@ -37,11 +37,13 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 import cv2
 
 from pipeline.config_manager import ConfigManager
-from pipeline.gesture_detector_fixed import GestureDetector
+from pipeline.mediapipe_detection import GestureDetector
 from pipeline.gesture_router import GestureRouter
 from pipeline.dtw_matcher import DTWMatcher
+from pipeline.task_mapper import GestureTaskMapper
 from pipeline.websocket_server import WebSocketServer
 from pipeline.recorder import Recorder
+from pipeline.mjpeg_server import MJPEGServer
 from Mapping.action_executor_v2 import ActionExecutor
 
 # Logging
@@ -73,28 +75,36 @@ def parse_args():
 def run(args):
     global _pipeline_running
     logger = logging.getLogger("main")
-    logger.info("Starting GestureSelect pipelineâ€¦")
+    logger.info("Starting GestureSelect pipeline...")
 
-    # Boot components
+    # Boot components — ordered by dependency
     cfg      = ConfigManager(args.config)
-    cfg.start_watching()                  # live-reload on UI config changes
+    cfg.start_watching()          # live-reload on UI config changes
+
+    # GestureTaskMapper owns all gesture->task binding logic
+    # Nothing else should call cfg.get_binding() directly
+    mapper   = GestureTaskMapper(cfg)
 
     dtw      = DTWMatcher(cfg)
     detector = GestureDetector(cfg)
-    router   = GestureRouter(cfg, dtw)
-    executor = ActionExecutor(cfg)        # NEW: translates actions â†’ commands
+    router   = GestureRouter(cfg, dtw, mapper=mapper)  # mapper is the binding authority
+    executor = ActionExecutor(cfg)                      # translates task_ids -> OS commands
     recorder = Recorder(cfg, dtw)
     server   = WebSocketServer(cfg)
     server.start()
+
+    # MJPEG video stream for the extension popup camera feed
+    mjpeg = MJPEGServer(port=8767)
+    mjpeg.start()
 
     # Start HTTP control server (allows extension to check status)
     _stop_signal.clear()
     start_control_server(_stop_signal)
     _pipeline_running = True
 
-    # Attach a recorder reference to the server so inbound WS messages can
-    # trigger recording sessions from the UI
-    _attach_recorder_commands(server, recorder, cfg)
+    # Attach recording + binding command handlers to the WebSocket server
+    # The mapper is passed so UPDATE_BINDING goes through GestureTaskMapper
+    _attach_recorder_commands(server, recorder, cfg, mapper)
 
     #  Camera setup 
     s = cfg.settings
@@ -107,7 +117,7 @@ def run(args):
         sys.exit(1)
 
     logger.info(
-        f"Camera opened: {int(cam.get(cv2.CAP_PROP_FRAME_WIDTH))}Ã—"
+        f"Camera opened: {int(cam.get(cv2.CAP_PROP_FRAME_WIDTH))}×"
         f"{int(cam.get(cv2.CAP_PROP_FRAME_HEIGHT))}"
     )
     logger.info(f"WebSocket: ws://{cfg.ws_host}:{cfg.ws_port}")
@@ -119,7 +129,7 @@ def run(args):
         while not _stop_signal.is_set():
             ret, frame = cam.read()
             if not ret:
-                logger.warning("Frame capture failed â€” retrying.")
+                logger.warning("Frame capture failed — retrying.")
                 time.sleep(0.05)
                 continue
 
@@ -144,9 +154,9 @@ def run(args):
                 # Log execution
                 cmd_str = result.command or 'N/A'
                 logger.info(
-                    f"â†’ {event.action_id:25s}  gesture={event.gesture_id:15s} "
+                    f"[ACT] {event.action_id:25s}  gesture={event.gesture_id:15s} "
                     f"hand={event.hand:6s}  cmd={cmd_str:20s}  "
-                    f"success={result.success}  clients={server.client_count}"
+                    f"ok={result.success}  clients={server.client_count}"
                 )
                 
                 # Broadcast ActionEvent (gesture detection info)
@@ -164,7 +174,7 @@ def run(args):
             status = "running" if frame_result.hands else "no_hands"
             server.broadcast_status(status)
 
-            # 6. FPS overlay
+            # 6. FPS overlay + push to MJPEG stream
             now = time.time()
             fps_times.append(now)
             fps_times = [t for t in fps_times if now - t < 1.0]
@@ -175,9 +185,12 @@ def run(args):
                         (10, annotated.shape[0] - 35),
                         cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
 
+            # Push annotated frame to MJPEG stream (always, even in no-preview mode)
+            mjpeg.push_frame(annotated)
+
             # 7. Preview window
             if not args.no_preview:
-                cv2.imshow("GestureSelect â€” Press Q to quit", annotated)
+                cv2.imshow("GestureSelect — Press Q to quit", annotated)
                 key = cv2.waitKey(1) & 0xFF
                 if key == ord("q"):
                     break
@@ -185,7 +198,7 @@ def run(args):
                     logger.info("Manual config reload triggered.")
                     cfg._load()
                 elif key == ord("c"):
-                    logger.info("Buffers cleared â€” reset gesture history.")
+                    logger.info("Buffers cleared — reset gesture history.")
                     # Clear detector buffers
                     for side in ("Left", "Right"):
                         detector._static_buf[side].clear()
@@ -199,6 +212,7 @@ def run(args):
         cam.release()
         cv2.destroyAllWindows()
         detector.close()
+        mjpeg.stop()
         server.stop()
         _pipeline_running = False
         logger.info("Pipeline shut down cleanly.")
@@ -209,16 +223,14 @@ def run(args):
 def _attach_recorder_commands(
     server: WebSocketServer,
     recorder: Recorder,
-    cfg: ConfigManager
+    cfg: ConfigManager,
+    mapper=None,            # GestureTaskMapper — owns binding logic
 ):
     """
-    Monkey-patch the server's inbound handler to also handle
-    recording session commands sent from the extension UI.
+    Patch the server's inbound handler to handle UI commands:
 
-    New inbound message types:
-      { "type": "START_RECORDING", "gesture_id": "...", "label": "...",
-        "gesture_type": "static"|"dynamic", "hand": "right"|"left" }
-      { "type": "CANCEL_RECORDING" }
+      Recording:  START_RECORDING | CANCEL_RECORDING
+      Mapping:    UPDATE_BINDING  | DELETE_CUSTOM_GESTURE | RESET_BINDINGS
     """
     original_handler = server._handle_inbound
 
@@ -231,9 +243,9 @@ def _attach_recorder_commands(
 
         if msg.get("type") == "START_RECORDING":
             recorder.start_session(
-                gesture_id   = msg.get("gesture_id", f"custom_{int(time.time())}"),
-                label        = msg.get("label", "Custom Gesture"),
-                gesture_type = msg.get("gesture_type", "static"),
+                gesture_id     = msg.get("gesture_id", f"custom_{int(time.time())}"),
+                label          = msg.get("label", "Custom Gesture"),
+                gesture_type   = msg.get("gesture_type", "static"),
                 preferred_hand = msg.get("hand", "Right").capitalize()
             )
             await ws.send(json.dumps({
@@ -241,10 +253,51 @@ def _attach_recorder_commands(
                 "recording_started": True,
                 "gesture_id": msg.get("gesture_id")
             }))
+
         elif msg.get("type") == "CANCEL_RECORDING":
             event = recorder.cancel()
             if event:
                 _broadcast_recording_event(server, event)
+
+        elif msg.get("type") == "UPDATE_BINDING":
+            # Delegate entirely to GestureTaskMapper — it owns binding logic
+            gesture_id = msg.get("gesture_id", "")
+            task_id    = msg.get("action_id",  "none")
+            if gesture_id:
+                if mapper:
+                    mapper.update(gesture_id, task_id)  # validates + persists
+                else:
+                    cfg.set_binding(gesture_id, task_id)  # fallback
+                logger.info(f"[Mapper] Binding updated: {gesture_id} -> {task_id}")
+                await ws.send(json.dumps({
+                    "type": "ACK", "binding_updated": True,
+                    "gesture_id": gesture_id, "action_id": task_id
+                }))
+
+        elif msg.get("type") == "DELETE_CUSTOM_GESTURE":
+            gesture_id = msg.get("gesture_id", "")
+            if gesture_id:
+                cfg.delete_custom_gesture(gesture_id)
+                logger.info(f"[Mapper] Custom gesture deleted: {gesture_id}")
+                await ws.send(json.dumps({
+                    "type": "ACK", "gesture_deleted": True,
+                    "gesture_id": gesture_id
+                }))
+
+        elif msg.get("type") == "RESET_BINDINGS":
+            # Delegate to GestureTaskMapper — DEFAULT_BINDINGS lives there
+            if mapper:
+                mapper.reset_defaults()
+            else:
+                # Fallback: use DEFAULT_BINDINGS from GestureTaskMapper class
+                from pipeline.task_mapper import GestureTaskMapper as _GM
+                with cfg._lock:
+                    for gid, tid in _GM.DEFAULT_BINDINGS.items():
+                        cfg._config.setdefault("bindings", {})[gid] = tid
+                cfg.save()
+            logger.info("[Mapper] All built-in bindings reset to factory defaults")
+            await ws.send(json.dumps({"type": "ACK", "bindings_reset": True}))
+
         else:
             await original_handler(ws, raw)
 

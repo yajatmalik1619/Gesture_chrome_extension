@@ -3,8 +3,8 @@
     "websocket_host": "localhost",
     "websocket_port": 8765,
     "max_num_hands": 2,
-    "detection_confidence": 0.80,
-    "tracking_confidence": 0.70,
+    "detection_confidence": 0.8,
+    "tracking_confidence": 0.7,
     "model_complexity": 1,
     "gesture_buffer_size": 5,
     "dynamic_buffer_size": 5,
@@ -198,7 +198,7 @@
       "label": "Open Palm",
       "type": "static",
       "hand": "any",
-      "enabled": true,
+      "enabled": false,
       "description": "All fingers extended"
     },
     "THUMBS_UP": {
@@ -226,21 +226,21 @@
       "label": "OK Sign",
       "type": "static",
       "hand": "any",
-      "enabled": true,
+      "enabled": false,
       "description": "Thumb and index finger touching, other fingers extended"
     },
     "POINTING_UP": {
       "label": "Pointing Up",
       "type": "static",
       "hand": "any",
-      "enabled": true,
+      "enabled": false,
       "description": "Index finger pointing upward"
     },
     "POINTING_DOWN": {
       "label": "Pointing Down",
       "type": "static",
       "hand": "any",
-      "enabled": true,
+      "enabled": false,
       "description": "Index finger pointing downward"
     },
     "SWIPE_LEFT": {
@@ -275,52 +275,59 @@
       "label": "Wave",
       "type": "dynamic",
       "hand": "any",
-      "enabled": true,
+      "enabled": false,
       "description": "Side-to-side oscillating motion"
     },
     "TWO_FISTS": {
       "label": "Two Fists Together",
       "type": "combo",
       "enabled": true,
-      "combo_rule": ["FIST", "FIST"],
+      "combo_rule": [
+        "FIST",
+        "FIST"
+      ],
       "description": "Both hands in fist position"
+    },
+    "DOUBLE_THUMBS_UP": {
+      "label": "Double Thumbs Up",
+      "type": "combo",
+      "enabled": true,
+      "combo_rule": [
+        "THUMBS_UP",
+        "THUMBS_UP"
+      ],
+      "description": "Both hands thumbs up — recognized, no default task"
+    },
+    "HIGH_FIVE": {
+      "label": "High Five",
+      "type": "combo",
+      "enabled": true,
+      "combo_rule": [
+        "PALM",
+        "PALM"
+      ],
+      "description": "Both hands open palm — recognized, no default task"
     }
   },
   "bindings": {
-    "_comment": "PREDEFINED BINDINGS - mapped to built-in gestures",
-    "PALM": "tab_new",
-    "FIST": "tab_close",
-    "SWIPE_RIGHT": "tab_switch_right",
+    "SWIPE_DOWN": "window_minimize",
+    "SWIPE_UP": "window_maximize",
     "SWIPE_LEFT": "tab_switch_left",
-    "SWIPE_UP": "window_minimize",
-    "SWIPE_DOWN": "window_maximize",
-    "WAVE": "refresh_page",
+    "SWIPE_RIGHT": "tab_switch_right",
+    "INDEX_ONLY": "tab_new",
+    "FIST": "tab_close",
     "THUMBS_UP": "fullscreen_toggle",
-    "PEACE": "back",
-    "INDEX_ONLY": "text_select_start",
-    "OK": "text_search_google",
-    "POINTING_UP": "scroll_up",
-    "POINTING_DOWN": "scroll_down",
-    "TWO_FISTS": "scroll_stop",
-    
-    "_comment_user_defined": "USER-DEFINED BINDINGS - capture landmarks and map to actions",
-    "_user_new_window": "Capture gesture for: new_window",
-    "_user_new_incognito": "Capture gesture for: new_incognito_window",
-    "_user_tab_reopen": "Capture gesture for: tab_reopen",
-    "_user_tab_rightmost": "Capture gesture for: tab_jump_rightmost",
-    "_user_go_home": "Capture gesture for: go_home",
-    "_user_window_close": "Capture gesture for: window_close",
-    "_user_tab_move_right": "Capture gesture for: tab_move_right",
-    "_user_tab_move_left": "Capture gesture for: tab_move_left",
-    "_user_back": "Capture gesture for: back",
-    "_user_forward": "Capture gesture for: forward"
+    "TWO_FISTS": "none",
+    "DOUBLE_THUMBS_UP": "none",
+    "HIGH_FIVE": "none",
+    "PALM": "refresh_page",
+    "PEACE": "refresh_page",
+    "OK": "none",
+    "POINTING_UP": "none",
+    "POINTING_DOWN": "none",
+    "WAVE": "none"
   },
-  "custom_gestures": {
-    "_metadata": {
-      "description": "User-defined gestures are stored here",
-      "next_id": 1
-    }
-  },
+  "custom_gestures": {},
   "keyboard_shortcuts_library": {
     "_description": "Library of useful shortcuts (copy/paste removed as they use gesture-based workflow)",
     "undo": {

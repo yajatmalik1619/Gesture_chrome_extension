@@ -22,7 +22,7 @@ from dataclasses import dataclass, asdict, field
 from typing import Optional
 
 from pipeline.config_manager import ConfigManager
-from pipeline.gesture_detector_fixed import FrameResult, HandResult
+from pipeline.mediapipe_detection import FrameResult, HandResult
 from pipeline.dtw_matcher import DTWMatcher
 
 logger = logging.getLogger(__name__)
@@ -121,9 +121,17 @@ class GestureRouter:
         "PEACE": "cursor_move",
     }
 
-    def __init__(self, config: ConfigManager, dtw: DTWMatcher):
-        self.cfg  = config
-        self.dtw  = dtw
+    def __init__(self, config: ConfigManager, dtw: DTWMatcher, mapper=None):
+        """
+        Args:
+            config:  ConfigManager — for action metadata (is_repeatable, etc.)
+            dtw:     DTWMatcher    — for custom gesture matching
+            mapper:  GestureTaskMapper — owns gesture->task binding logic.
+                     If None (legacy), falls back to cfg.get_binding() directly.
+        """
+        self.cfg    = config
+        self.dtw    = dtw
+        self._mapper = mapper  # GestureTaskMapper — the binding authority
 
         mc = config.multiplier_config
         self._multiplier = MultiplierTracker(
@@ -214,11 +222,21 @@ class GestureRouter:
 
         return events
 
+    # ── Internal Helpers ────────────────────────────────────────────────────────
+
+    def _get_task(self, gesture_id: str) -> Optional[str]:
+        """Delegate binding lookup to GestureTaskMapper (with cfg fallback)."""
+        if self._mapper is not None:
+            return self._mapper.get_task(gesture_id)
+        # Legacy fallback — should not normally be reached
+        return self.cfg.get_binding(gesture_id)
+
     #  Combo Resolution 
 
     def _resolve_combo(self, frame_result: FrameResult) -> Optional[ActionEvent]:
         gid = frame_result.combo_gesture
-        action_id = self.cfg.get_binding(gid)
+        # Use GestureTaskMapper as the authority on bindings
+        action_id = self._get_task(gid)
         if not action_id:
             return None
 
@@ -249,14 +267,13 @@ class GestureRouter:
             self._last_action[hr.label]  = None
             return None
 
-        # Try built-in binding first
-        action_id = self.cfg.get_binding(gesture_id)
+        # Try built-in binding via GestureTaskMapper (not cfg directly)
+        action_id = self._get_task(gesture_id)
 
-        # Bug 2 Fix: ALWAYS run DTW custom gesture matching every frame.
+        # Always run DTW custom gesture matching every frame.
         # Custom gestures may look identical to built-in gestures from the
         # detector's perspective, so we check if the live landmarks/sequence
-        # better match a custom gesture and give custom gestures priority when
-        # they match within their threshold.
+        # better match a custom gesture and give custom gestures priority.
         if hr.dynamic_gesture:
             custom_match = self.dtw.match_dynamic(self._get_dynamic_sequence(hr))
         else:
@@ -265,7 +282,7 @@ class GestureRouter:
         if custom_match:
             # Custom gesture takes priority over built-in binding
             gesture_id = custom_match
-            action_id  = self.cfg.get_binding(custom_match)
+            action_id  = self._get_task(custom_match)
 
         if not action_id:
             return None

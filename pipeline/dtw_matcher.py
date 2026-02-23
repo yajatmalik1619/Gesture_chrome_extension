@@ -23,9 +23,6 @@ Usage:
 """
 
 import logging
-import os
-from pathlib import Path
-import sys
 from pathlib import Path
 from typing import Optional
 
