@@ -73,7 +73,7 @@ def parse_args():
 def run(args):
     global _pipeline_running
     logger = logging.getLogger("main")
-    logger.info("Starting GestureSelect pipelineâ€¦")
+    logger.info("Starting GestureSelect pipeline...")
 
     # Boot components
     cfg      = ConfigManager(args.config)
@@ -107,7 +107,7 @@ def run(args):
         sys.exit(1)
 
     logger.info(
-        f"Camera opened: {int(cam.get(cv2.CAP_PROP_FRAME_WIDTH))}Ã—"
+        f"Camera opened: {int(cam.get(cv2.CAP_PROP_FRAME_WIDTH))}x"
         f"{int(cam.get(cv2.CAP_PROP_FRAME_HEIGHT))}"
     )
     logger.info(f"WebSocket: ws://{cfg.ws_host}:{cfg.ws_port}")
@@ -119,7 +119,7 @@ def run(args):
         while not _stop_signal.is_set():
             ret, frame = cam.read()
             if not ret:
-                logger.warning("Frame capture failed â€” retrying.")
+                logger.warning("Frame capture failed - retrying.")
                 time.sleep(0.05)
                 continue
 

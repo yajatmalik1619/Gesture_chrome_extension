@@ -70,6 +70,7 @@ class WebSocketServer:
         self._loop:    Optional[asyncio.AbstractEventLoop] = None
         self._thread:  Optional[threading.Thread] = None
         self._running  = False
+        self._stop_event: Optional[asyncio.Event] = None
 
         # FPS tracking for STATUS messages
         self._frame_times: list[float] = []
@@ -92,8 +93,11 @@ class WebSocketServer:
 
     def stop(self):
         self._running = False
-        if self._loop:
-            self._loop.call_soon_threadsafe(self._loop.stop)
+        if self._loop and self._stop_event:
+            self._loop.call_soon_threadsafe(self._stop_event.set)
+        if self._thread and self._thread.is_alive():
+            # Usually we don't join daemon threads but we should stop the loop
+            pass
 
     # ── Broadcasting (thread-safe, called from OpenCV thread) ─────────────────
 
@@ -140,10 +144,13 @@ class WebSocketServer:
     def _run_loop(self):
         self._loop = asyncio.new_event_loop()
         asyncio.set_event_loop(self._loop)
+        self._stop_event = asyncio.Event()
         try:
             self._loop.run_until_complete(self._serve())
         except Exception as e:
             logger.error(f"WebSocket loop error: {e}")
+        finally:
+            self._loop.close()
 
     async def _serve(self):
         async with websockets.serve(
@@ -152,9 +159,12 @@ class WebSocketServer:
             self.cfg.ws_port,
             ping_interval=20,
             ping_timeout=10,
-        ):
+        ) as server:
             logger.info(f"WebSocket server live on ws://{self.cfg.ws_host}:{self.cfg.ws_port}")
-            await asyncio.Future()   # run forever until loop is stopped
+            await self._stop_event.wait()
+            logger.info("WebSocket server stopping...")
+            server.close()
+            await server.wait_closed()
 
     async def _handler(self, websocket: WebSocketServerProtocol):
         """Handle a new client connection."""

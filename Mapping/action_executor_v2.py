@@ -68,7 +68,7 @@ class ActionExecutor:
 
     # Main Execution
 
-  def execute(self, event: ActionEvent) -> ExecutionResult:
+    def execute(self, event: ActionEvent) -> ExecutionResult:
         """Execute an ActionEvent and return the result."""
         action_def = self.cfg.get_action(event.action_id)
         
@@ -384,7 +384,7 @@ class ActionExecutor:
         self.cfg.set("actions", action_id, action_data, persist=True)
         self.cfg.set_binding(gesture_id, action_id)
         
-        logger.info(f"Created custom URL action: {gesture_id} â†’ {url}")
+        logger.info(f"Created custom URL action: {gesture_id} -> {url}")
         return True
 
     def create_custom_shortcut_action(
@@ -410,7 +410,7 @@ class ActionExecutor:
         self.cfg.set("actions", action_id, action_data, persist=True)
         self.cfg.set_binding(gesture_id, action_id)
         
-        logger.info(f"Created custom shortcut action: {gesture_id} â†’ {shortcut}")
+        logger.info(f"Created custom shortcut action: {gesture_id} -> {shortcut}")
         return True
 
     def bind_gesture_to_library_shortcut(
@@ -444,7 +444,7 @@ class ActionExecutor:
         self.cfg.set_binding(old_gesture_id, "none")
         self.cfg.set_binding(new_gesture_id, action_id)
         
-        logger.info(f"Rebound action '{action_id}': {old_gesture_id} â†’ {new_gesture_id}")
+        logger.info(f"Rebound action '{action_id}': {old_gesture_id} -> {new_gesture_id}")
         return True
 
     # State Management
