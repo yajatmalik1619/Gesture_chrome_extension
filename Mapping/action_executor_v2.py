@@ -96,8 +96,7 @@ class ActionExecutor:
                     action_id=event.action_id,
                     error="Area screenshot is active. Other actions are locked."
                 )
-
-        # ── Debounce non-repeatable actions ──
+            
         is_repeatable = action_def.get("repeatable", False)
         if not is_repeatable:
             now = time.time()
