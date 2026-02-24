@@ -35,9 +35,6 @@ from pipeline.config_manager import ConfigManager
 
 logger = logging.getLogger(__name__)
 
-
-# ── Data Classes (pipeline interface) ─────────────────────────────────────────
-
 @dataclass
 class HandResult:
     """Processed result for a single hand in one frame."""
