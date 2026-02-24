@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GestureSelect | Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <nav class="sidebar">
+            <div class="logo">
+                <i class="fas fa-hand-pointer"></i>
+                <span>GestureSelect</span>
+            </div>
+            <ul class="nav-links">
+                <li class="nav-item active" data-section="status">
+                    <i class="fas fa-chart-pie"></i>
+                    <span>Overview</span>
+                </li>
+                <li class="nav-item" data-section="gestures">
+                    <i class="fas fa-keyboard"></i>
+                    <span>Bindings</span>
+                </li>
+                <li class="nav-item" data-section="record">
+                    <i class="fas fa-microphone"></i>
+                    <span>Record</span>
+                </li>
+                <li class="nav-item" data-section="camera">
+                    <i class="fas fa-video"></i>
+                    <span>Live Cam</span>
+                </li>
+            </ul>
+            <div class="sidebar-footer">
+                <div class="status-indicator">
+                    <div class="dot disconnected" id="pipeline-dot"></div>
+                    <span id="pipeline-status-text">Pipeline Offline</span>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Main Content Area -->
+        <main class="content">
+            <header class="top-bar">
+                <h1 id="section-title">Overview</h1>
+                <div class="actions">
+                    <button id="toggle-pipeline" class="btn btn-primary">
+                        <i class="fas fa-play"></i> Start Pipeline
+                    </button>
+                </div>
+            </header>
+
+            <!-- Sections -->
+            <div class="sections-container">
+                <!-- Overview Section -->
+                <section id="section-status" class="content-section active">
+                    <div class="grid-stats">
+                        <div class="stat-card">
+                            <i class="fas fa-bolt"></i>
+                            <div class="stat-info">
+                                <span class="label">Detections Today</span>
+                                <span class="value" id="stat-detections">128</span>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <i class="fas fa-clock"></i>
+                            <div class="stat-info">
+                                <span class="label">Active Runtime</span>
+                                <span class="value" id="stat-runtime">02:45:00</span>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <i class="fas fa-check-circle"></i>
+                            <div class="stat-info">
+                                <span class="label">Success Rate</span>
+                                <span class="value" id="stat-accuracy">98.5%</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="main-grid">
+                        <div class="glass-card active-gesture-card">
+                            <h3>Current Gesture</h3>
+                            <div class="gesture-display">
+                                <div class="gesture-icon" id="current-gesture-icon">
+                                    <i class="fas fa-ellipsis-h"></i>
+                                </div>
+                                <div class="gesture-meta">
+                                    <span class="name" id="current-gesture-name">None Detected</span>
+                                    <span class="action" id="current-action-name">Waiting for input...</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Bindings Section -->
+                <section id="section-gestures" class="content-section">
+                    <div class="glass-card">
+                        <div class="card-header">
+                            <h3>Gesture Bindings</h3>
+                            <div class="badge badge-purple">Dynamic & Static</div>
+                        </div>
+                        <div id="bindings-list" class="bindings-list">
+                            <!-- Populated by JS -->
+                            <div class="loading-state">Loading configuration...</div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Record Section -->
+                <section id="section-record" class="content-section">
+                    <div class="glass-card record-studio">
+                        <div class="card-header">
+                            <h3>Recording Studio</h3>
+                            <div class="badge badge-red">Ready</div>
+                        </div>
+                        <div class="recording-controls">
+                            <div class="form-group">
+                                <label>Gesture Name</label>
+                                <input type="text" id="record-name" placeholder="e.g. Draw Circle">
+                            </div>
+                            <div class="record-visualizer">
+                                <div class="record-timer" id="record-timer">0.0s</div>
+                                <div class="visualizer-content">
+                                    <i class="fas fa-hand-dots"></i>
+                                    <p>Position your hand clearly in the frame</p>
+                                </div>
+                            </div>
+                            <button class="btn btn-record" id="start-record">
+                                <i class="fas fa-circle"></i> Start Recording
+                            </button>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Camera Section -->
+                <section id="section-camera" class="content-section">
+                    <div class="glass-card camera-view">
+                        <div class="card-header">
+                            <h3>Live Feed</h3>
+                            <div class="connection-status">
+                                <span id="cam-status">WebSocket: Connecting...</span>
+                            </div>
+                        </div>
+                        <div class="video-container">
+                            <div class="video-placeholder">
+                                <i class="fas fa-video-slash"></i>
+                                <span>Waiting for pipeline...</span>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <!-- Notification Toast -->
+    <div id="toast" class="toast"></div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
