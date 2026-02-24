@@ -12,6 +12,8 @@ from typing import Optional, Dict, Any
 from dataclasses import dataclass
 import math
 import time
+import pyautogui
+pyautogui.FAILSAFE = False # Prevent accidental aborts if mouse hits corner
 
 from pipeline.config_manager import ConfigManager
 from pipeline.gesture_router import ActionEvent
@@ -36,8 +38,6 @@ class ExecutionResult:
             "params": self.params or {},
             "error": self.error
         }
-
-
 class ActionExecutor:
     """
     Translates ActionEvents into executable browser commands.
@@ -68,8 +68,6 @@ class ActionExecutor:
         else:
             return "linux"
 
-    # â”€â”€ Main Execution â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-
     def execute(self, event: ActionEvent) -> ExecutionResult:
         """Execute an ActionEvent and return the result."""
         action_def = self.cfg.get_action(event.action_id)
@@ -80,6 +78,24 @@ class ActionExecutor:
                 action_id=event.action_id,
                 error=f"Action not found: {event.action_id}"
             )
+            
+        action_type = action_def.get("type", "unknown")
+
+        # ── State Lock: Area Screenshot ──
+        # If an area screenshot is currently active, WE MUST ONLY ALLOW "area_screenshot" actions (like drag to crop).
+        # Any other gesture should be completely ignored until the screenshot state is stopped.
+        if self._text_selection_state.get("active", False):
+            if action_type != "area_screenshot":
+                # The user stopped the drag gesture. Let go of the mouse to finalize the crop.
+                logger.info("Area screenshot state ended by different gesture. Releasing mouse.")
+                pyautogui.mouseUp(button='left')
+                self._text_selection_state["active"] = False
+                
+                return ExecutionResult(
+                    success=False,
+                    action_id=event.action_id,
+                    error="Area screenshot is active. Other actions are locked."
+                )
 
         # ── Debounce non-repeatable actions ──
         is_repeatable = action_def.get("repeatable", False)
@@ -99,16 +115,26 @@ class ActionExecutor:
         action_type = action_def.get("type", "unknown")
         
         try:
-            if action_type == "system":
+            if action_type == "extension":
+                # Extension handles this natively via WebSocket
+                return ExecutionResult(
+                    success=True,
+                    action_id=event.action_id,
+                    command="EXTENSION_CUSTOM",
+                    params={}
+                )
+            elif action_type == "system":
                 return self._execute_system(event, action_def)
             elif action_type == "keyboard":
                 return self._execute_keyboard(event, action_def)
             elif action_type == "scroll":
                 return self._execute_scroll(event, action_def)
-            elif action_type == "text_selection":
-                return self._execute_text_selection(event, action_def)
+            elif action_type == "area_screenshot":
+                return self._execute_area_screenshot(event, action_def)
             elif action_type == "url_navigation":
                 return self._execute_url_navigation(event, action_def)
+            elif action_type == "paste_and_enter":
+                return self._execute_paste_and_enter(event, action_def)
             else:
                 return ExecutionResult(
                     success=False,
@@ -165,12 +191,16 @@ class ActionExecutor:
             return ExecutionResult(
                 success=False,
                 action_id=event.action_id,
-                error="No shortcut defined for this action"
+                error="No shortcut defined"
             )
+            
+        magnitude = event.magnitude
         
-        # Handle finger count modifier for tab switching
-        magnitude = event.magnitude if event.magnitude > 1 else 1
-        
+        # Some shortcuts might need to be repeated (e.g., volume up, next tab)
+        for _ in range(magnitude):
+            keys = shortcut.split('+')
+            pyautogui.hotkey(*keys)
+            
         params = {
             "shortcut": shortcut,
             "repeat": magnitude
@@ -181,6 +211,26 @@ class ActionExecutor:
             action_id=event.action_id,
             command="KEYBOARD_SHORTCUT",
             params=params
+        )
+
+    # Paste and Enter Action
+    
+    def _execute_paste_and_enter(self, event: ActionEvent, action_def: dict) -> ExecutionResult:
+        """Paste contents from clipboard and immediately press enter."""
+        if self._os_type == "mac":
+            pyautogui.hotkey('command', 'v')
+        else:
+            pyautogui.hotkey('ctrl', 'v')
+            
+        # Give OS a brief moment to paste before pressing enter
+        time.sleep(5)
+        pyautogui.press('enter')
+        
+        return ExecutionResult(
+            success=True,
+            action_id=event.action_id,
+            command="PASTE_AND_ENTER",
+            params={}
         )
 
     #Scroll Actions
@@ -216,108 +266,92 @@ class ActionExecutor:
             params=params
         )
 
-    #  Text Selection Workflow 
+    #  Area Screenshot Workflow 
 
-    def _execute_text_selection(self, event: ActionEvent, action_def: dict) -> ExecutionResult:
+    def _execute_area_screenshot(self, event: ActionEvent, action_def: dict) -> ExecutionResult:
         """
-        Handle text selection using index finger (landmark 8).
+        Handle area screenshots using index finger (landmark 8) for cropping.
         
-        - Horizontal movement = character-wise selection
-        - Vertical movement = line-wise selection (higher sensitivity)
+        - start: Triggers Win+Shift+S and moves mouse to starting position.
+        - drag: Drags mouse from starting position down to crop rectangular area.
         """
         selection_action = action_def.get("selection_action")
         
+        # Get screen size to scale normalized coordinates
+        screen_width, screen_height = pyautogui.size()
+        
         if selection_action == "start":
-            # Initialize text selection state using index finger tip
             self._text_selection_state["active"] = True
+            
+            # Trigger Windows Snipping Tool natively
+            if self._os_type == "windows":
+                pyautogui.hotkey('win', 'shift', 's')
+                # Brief delay to allow snipping tool overlay to appear
+                time.sleep(0.5)
+            elif self._os_type == "mac":
+                pyautogui.hotkey('command', 'shift', '4')
+                time.sleep(0.3)
             
             if "landmarks" in event.meta:
                 landmarks = event.meta["landmarks"]
-                index_tip = landmarks[8]  # Index finger tip
+                index_tip = landmarks[8]  # Index finger tip (x, y normalized 0-1)
                 
-                self._text_selection_state["start_pos"] = {
-                    "x": index_tip[0], 
-                    "y": index_tip[1]
-                }
-                self._text_selection_state["current_pos"] = {
-                    "x": index_tip[0], 
-                    "y": index_tip[1]
-                }
+                # Convert normalized coords (0-1) to screen pixels. 
+                # Note: Assuming camera is horizontally flipped (mirror), adjust x if needed.
+                start_x = int(index_tip[0] * screen_width)
+                start_y = int(index_tip[1] * screen_height)
+                
+                # Store the NORMALIZED starting position for delta calculations
+                self._text_selection_state["start_pos"] = {"x": index_tip[0], "y": index_tip[1]}
+                self._text_selection_state["current_pos"] = {"x": index_tip[0], "y": index_tip[1]}
+                
+                # Move to start position
+                pyautogui.moveTo(start_x, start_y)
+                # Press the left mouse button down to start the crop
+                pyautogui.mouseDown(button='left')
             
             return ExecutionResult(
                 success=True,
                 action_id=event.action_id,
-                command="TEXT_SELECT_START",
-                params=self._text_selection_state["start_pos"]
+                command="AREA_SCREENSHOT_START",
+                params=self._text_selection_state.get("start_pos")
             )
         
         elif selection_action == "drag":
-            if not self._text_selection_state["active"]:
+            if not self._text_selection_state.get("active", False):
                 return ExecutionResult(
                     success=False,
                     action_id=event.action_id,
-                    error="Text selection not active"
+                    error="Area screenshot not active"
                 )
             
             if "landmarks" in event.meta:
                 landmarks = event.meta["landmarks"]
                 index_tip = landmarks[8]  # Index finger tip
                 
-                start = self._text_selection_state["start_pos"]
+                last_pos = self._text_selection_state["current_pos"]
                 
-                # Calculate horizontal and vertical distances
-                dx = index_tip[0] - start["x"]
-                dy = index_tip[1] - start["y"]
+                # Calculate normalized delta movement
+                dx_norm = index_tip[0] - last_pos["x"]
+                dy_norm = index_tip[1] - last_pos["y"]
                 
-                # Determine if movement is primarily horizontal or vertical
-                abs_dx = abs(dx)
-                abs_dy = abs(dy)
+                # Scale delta to screen pixels (using a sensitivity multiplier)
+                sensitivity = 1.2
+                dx_pixels = int(dx_norm * screen_width * sensitivity)
+                dy_pixels = int(dy_norm * screen_height * sensitivity)
                 
-                # Get sensitivities from config
-                char_sensitivity = action_def.get("char_sensitivity", 50)
-                line_sensitivity = action_def.get("line_sensitivity", 15)  # Lower = more sensitive
+                # If we're dragging, move the mouse relatively while the button is down
+                if dx_pixels != 0 or dy_pixels != 0:
+                    pyautogui.move(dx_pixels, dy_pixels, _pause=False)
                 
-                if abs_dx > abs_dy:
-                    # Horizontal movement - character-wise selection
-                    direction = "horizontal"
-                    distance = abs_dx
-                    units_to_select = int(distance * 1000 / char_sensitivity)
-                    selection_type = "chars"
-                    move_direction = "right" if dx > 0 else "left"
-                else:
-                    # Vertical movement - line-wise selection
-                    direction = "vertical"
-                    distance = abs_dy
-                    units_to_select = int(distance * 1000 / line_sensitivity)
-                    selection_type = "lines"
-                    move_direction = "down" if dy > 0 else "up"
-                
-                self._text_selection_state["current_pos"] = {
-                    "x": index_tip[0], 
-                    "y": index_tip[1]
-                }
-                self._text_selection_state["direction"] = direction
-                
-                params = {
-                    "start": self._text_selection_state["start_pos"],
-                    "current": self._text_selection_state["current_pos"],
-                    "distance": float(distance),
-                    "units_to_select": units_to_select,
-                    "selection_type": selection_type,
-                    "direction": direction,
-                    "move_direction": move_direction
-                }
-                
-                logger.info(
-                    f"Text selection: {direction} movement, "
-                    f"selecting {units_to_select} {selection_type}"
-                )
+                # Update current position for next frame delta
+                self._text_selection_state["current_pos"] = {"x": index_tip[0], "y": index_tip[1]}
                 
                 return ExecutionResult(
                     success=True,
                     action_id=event.action_id,
-                    command="TEXT_SELECT_DRAG",
-                    params=params
+                    command="AREA_SCREENSHOT_DRAG",
+                    params={"current": self._text_selection_state["current_pos"]}
                 )
             
             return ExecutionResult(
@@ -325,30 +359,23 @@ class ActionExecutor:
                 action_id=event.action_id,
                 error="No landmark data available"
             )
-        
-        elif selection_action == "search":
-            if not self._text_selection_state["active"]:
-                return ExecutionResult(
-                    success=False,
-                    action_id=event.action_id,
-                    error="Text selection not active"
-                )
             
-            # Reset selection state
-            self._text_selection_state["active"] = False
-            
-            return ExecutionResult(
-                success=True,
-                action_id=event.action_id,
-                command="TEXT_SEARCH_GOOGLE",
-                params={}
-            )
-        
+        elif selection_action == "stop" or event.action_id == "area_screenshot_stop":
+             # This lets go of the mouse click, finalizing the crop
+             if self._text_selection_state.get("active", False):
+                 pyautogui.mouseUp(button='left')
+                 self._text_selection_state["active"] = False
+             
+             return ExecutionResult(
+                 success=True,
+                 action_id=event.action_id,
+                 command="AREA_SCREENSHOT_STOP"
+             )
         else:
             return ExecutionResult(
                 success=False,
                 action_id=event.action_id,
-                error=f"Unknown selection action: {selection_action}"
+                error=f"Unknown screenshot action: {selection_action}"
             )
 
     # URL Navigation 

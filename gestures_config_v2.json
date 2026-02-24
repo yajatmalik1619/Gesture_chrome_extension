@@ -165,25 +165,33 @@
       "shortcut": "alt+right",
       "shortcut_mac": "cmd+]"
     },
-    "text_select_start": {
-      "label": "Start Text Selection",
-      "type": "text_selection",
+    "area_screenshot_start": {
+      "label": "Take Area Screenshot",
+      "type": "area_screenshot",
       "repeatable": false,
       "selection_action": "start"
     },
-    "text_select_drag": {
-      "label": "Drag to Select Text",
-      "type": "text_selection",
-      "repeatable": true,
-      "selection_action": "drag",
-      "char_sensitivity": 50,
-      "line_sensitivity": 15
-    },
-    "text_search_google": {
-      "label": "Search Selected Text on Google",
-      "type": "text_selection",
+    "area_screenshot_stop": {
+      "label": "Stop Area Screenshot",
+      "type": "area_screenshot",
       "repeatable": false,
-      "selection_action": "search"
+      "selection_action": "stop"
+    },
+    "paste_and_enter": {
+      "label": "Paste and Enter",
+      "type": "paste_and_enter",
+      "repeatable": false
+    },
+    "extension_custom": {
+      "label": "Custom URL / Shortcut",
+      "type": "extension",
+      "repeatable": false
+    },
+    "area_screenshot_drag": {
+      "label": "Drag to Crop",
+      "type": "area_screenshot",
+      "repeatable": true,
+      "selection_action": "drag"
     }
   },
   "gestures": {
@@ -226,14 +234,14 @@
       "label": "OK Sign",
       "type": "static",
       "hand": "any",
-      "enabled": false,
+      "enabled": true,
       "description": "Thumb and index finger touching, other fingers extended"
     },
     "POINTING_UP": {
       "label": "Pointing Up",
       "type": "static",
       "hand": "any",
-      "enabled": false,
+      "enabled": true,
       "description": "Index finger pointing upward"
     },
     "POINTING_DOWN": {
@@ -310,20 +318,20 @@
     }
   },
   "bindings": {
-    "SWIPE_DOWN": "window_minimize",
-    "SWIPE_UP": "window_maximize",
+    "SWIPE_DOWN": "none",
+    "SWIPE_UP": "none",
     "SWIPE_LEFT": "tab_switch_left",
     "SWIPE_RIGHT": "tab_switch_right",
-    "INDEX_ONLY": "tab_new",
-    "FIST": "tab_close",
-    "THUMBS_UP": "fullscreen_toggle",
+    "INDEX_ONLY": "none",
+    "FIST": "area_screenshot_start",
+    "THUMBS_UP": "text_search_google",
     "TWO_FISTS": "none",
-    "DOUBLE_THUMBS_UP": "none",
-    "HIGH_FIVE": "none",
-    "PALM": "tab_close",
-    "PEACE": "refresh_page",
-    "OK": "none",
-    "POINTING_UP": "none",
+    "DOUBLE_THUMBS_UP": "paste_and_enter",
+    "HIGH_FIVE": "extension_custom",
+    "PALM": "scroll_stop",
+    "PEACE": "scroll_down",
+    "OK": "scroll_up",
+    "POINTING_UP": "tab_new",
     "POINTING_DOWN": "none",
     "WAVE": "none"
   },

@@ -219,6 +219,15 @@ class GestureRouter:
             self._multiplier.clear()
             self._last_gesture = {"Left": None, "Right": None, "Both": None}
             self._last_action  = {"Left": None, "Right": None, "Both": None}
+            
+            # Failsafe: if hand drops while taking a screenshot, stop the drag.
+            events.append(ActionEvent(
+                action_id="area_screenshot_stop",
+                gesture_id="none",
+                hand="none",
+                magnitude=1,
+                repeatable=False,
+            ))
 
         return events
 

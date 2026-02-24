@@ -108,7 +108,8 @@ function handleMessage(data) {
     chrome.storage.local.set({ lastGesture });
 
     // Execute any extension-side custom mappings (URL open / keyboard shortcut)
-    if (gesturesEnabled) {
+    // ONLY if the backend confirms this gesture is mapped to 'extension_custom'
+    if (gesturesEnabled && data.action_id === 'extension_custom') {
       chrome.storage.local.get(['customMappings'], (result) => {
         const mappings = result.customMappings || [];
         const match = mappings.find(m => m.gestureId === data.gesture_id);
@@ -159,9 +160,6 @@ async function executeCommand(exec) {
       case 'SCROLL_STOP': await executeScrollStop(); break;
       case 'MINIMIZE_WINDOW': await minimizeWindow(); break;
       case 'MAXIMIZE_WINDOW': await maximizeWindow(); break;
-      case 'TEXT_SELECT_START': await sendToContent({ type: 'TEXT_SELECT_START', params }); break;
-      case 'TEXT_SELECT_DRAG': await sendToContent({ type: 'TEXT_SELECT_DRAG', params }); break;
-      case 'TEXT_SEARCH_GOOGLE': await searchSelectedText(); break;
       case 'NAVIGATE_URL': await navigateToUrl(params); break;
       default: console.warn('[Exec] Unknown command:', command);
     }

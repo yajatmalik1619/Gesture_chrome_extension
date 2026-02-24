@@ -374,8 +374,8 @@ async function loadGestureBindings() {
   if (!tbody) return;
 
   const allGestures = [
-    ...Object.entries(gestures).filter(([id]) => !id.startsWith('_')).map(([id, g]) => ({ id, g, isCustom: false })),
-    ...Object.entries(custom).filter(([id]) => !id.startsWith('_')).map(([id, g]) => ({ id, g, isCustom: true })),
+    ...Object.entries(gestures).filter(([id]) => !id.startsWith('_') && id !== "INDEX_ONLY").map(([id, g]) => ({ id, g, isCustom: false })),
+    ...Object.entries(custom).filter(([id]) => !id.startsWith('_') && id !== "INDEX_ONLY").map(([id, g]) => ({ id, g, isCustom: true })),
   ];
 
   if (allGestures.length === 0) {
@@ -387,7 +387,7 @@ async function loadGestureBindings() {
   const taskOpts = `<option value="none">— none —</option>` +
     actionKeys.map(id => {
       const label = actions[id]?.label || id;
-      return `<option value="${id}">${label}</option>`;
+      return `<option value="${id}">${label} (${id})</option>`;
     }).join('');
 
   tbody.innerHTML = '';
@@ -399,7 +399,7 @@ async function loadGestureBindings() {
     row.style.cssText = 'display:grid;grid-template-columns:1fr 60px 1fr 32px;gap:4px;padding:6px 10px;border-bottom:1px solid var(--border);align-items:center;';
     row.innerHTML = `
       <div title="${g?.description || id}" style="overflow:hidden;">
-        <div style="font-size:11px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${g?.label || id}</div>
+        <div style="font-size:11px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${g?.label || id} <span style="font-weight:400;color:var(--text-faint);">(${id})</span></div>
         ${isCustom ? '<div style="font-size:9px;color:var(--text-faint);">custom</div>' : ''}
       </div>
       <span class="gesture-type-badge ${typeInfo.cls}" style="font-size:9px;padding:2px 5px;width:fit-content;">${typeInfo.label}</span>
@@ -530,9 +530,14 @@ saveMappingBtn.addEventListener('click', async () => {
     mapping.shortcut = sc.toLowerCase();
   }
   await chrome.runtime.sendMessage({ type: 'SAVE_CUSTOM_MAPPING', mapping });
+
+  // Tell backend to route this gesture as 'extension_custom'
+  await chrome.runtime.sendMessage({ type: 'UPDATE_BINDING', gesture_id: gestureId, action_id: 'extension_custom' });
+
   addForm.style.display = 'none';
   clearForm();
   loadExtMappings();
+  loadGestureBindings(); // refresh the dropdowns above too
   showToast('Mapping saved.');
 });
 
@@ -571,7 +576,12 @@ async function loadExtMappings() {
   extMappingList.querySelectorAll('.del-ext-btn').forEach(btn => {
     btn.addEventListener('click', async () => {
       await chrome.runtime.sendMessage({ type: 'DELETE_CUSTOM_MAPPING', gestureId: btn.dataset.id });
+
+      // Reset Python backend binding to none
+      await chrome.runtime.sendMessage({ type: 'UPDATE_BINDING', gesture_id: btn.dataset.id, action_id: 'none' });
+
       loadExtMappings();
+      loadGestureBindings();
       showToast('Mapping removed.');
     });
   });

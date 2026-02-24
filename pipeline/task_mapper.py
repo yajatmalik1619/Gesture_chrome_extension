@@ -77,6 +77,10 @@ class GestureTaskMapper:
         Binding = "none" (or missing) -> nothing fires.
         GestureRouter calls this once per detected gesture per frame.
         """
+        # HARDCODED: INDEX_ONLY MUST be area_screenshot_drag (unmappable)
+        if gesture_id == "INDEX_ONLY":
+            return "area_screenshot_drag"
+
         raw = self._cfg.get("bindings", gesture_id)
         if raw is None or raw == "none" or str(raw).startswith("_"):
             return None
@@ -93,6 +97,10 @@ class GestureTaskMapper:
         had enabled=false, we auto-enable it so the `enabled` flag stays
         consistent with the binding.
         """
+        # HARDCODED: INDEX_ONLY MUST be area_screenshot_drag (unmappable)
+        if gesture_id == "INDEX_ONLY":
+            return
+
         self._cfg.set_binding(gesture_id, task_id)
 
         # Auto-enable gesture when a real task is assigned to it
