@@ -56,8 +56,17 @@ class DashboardApp {
     }
 
     async initRecorder() {
-        const { GestureRecorder } = await import('./gesture_recorder.js');
         this.recorder = new GestureRecorder();
+
+        // Handle Hand Status updates
+        this.recorder.onResults = (results) => {
+            const handDetected = results && results.landmarks && results.landmarks.length > 0;
+            const badge = document.getElementById(`hand-status-${this.currentActiveWebcam}`);
+            if (badge) {
+                badge.style.opacity = handDetected ? '1' : '0';
+            }
+        };
+
         await this.recorder.initialize('webcam-shortcuts', 'canvas-shortcuts');
     }
 
@@ -81,6 +90,17 @@ class DashboardApp {
         const overlay = document.getElementById('countdown-overlay');
         const countText = document.getElementById('countdown-text');
 
+        // Check if hand is detected before starting the countdown to guide the user
+        const isHandPresent = () => {
+            const results = this.recorder.results;
+            return results && results.landmarks && results.landmarks.length > 0;
+        };
+
+        if (!isHandPresent()) {
+            this.showToast('Please place your hand in view first', 'error');
+            return;
+        }
+
         // Countdown
         overlay.style.opacity = '1';
         for (let i = 3; i > 0; i--) {
@@ -94,14 +114,15 @@ class DashboardApp {
         btn.classList.add('animate-pulse', 'bg-red-600');
         this.recorder.startRecording();
 
-        await new Promise(r => setTimeout(r, 2000));
+        // Capture for 3 seconds to ensure enough frames
+        await new Promise(r => setTimeout(r, 3000));
 
         const samples = this.recorder.stopRecording();
         btn.innerText = 'Record Gesture';
         btn.classList.remove('animate-pulse', 'bg-red-600');
 
-        if (samples.length < 5) {
-            this.showToast('Recording failed: Too few frames captured', 'error');
+        if (samples.length < 10) {
+            this.showToast('Recording failed: Keep your hand visible while capturing', 'error');
             return;
         }
 

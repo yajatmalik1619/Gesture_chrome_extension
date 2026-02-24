@@ -229,8 +229,17 @@
                         class="flex-1 relative rounded-2xl overflow-hidden bg-black aspect-video border border-slate-700">
                         <video id="webcam-shortcuts" class="absolute inset-0 w-full h-full object-cover" autoplay
                             playsinline></video>
-                        <canvas id="canvas-shortcuts" class="absolute inset-0 w-full h-full object-cover"></canvas>
-                        <div class="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 transition-opacity pointer-events-none"
+                        <canvas id="canvas-shortcuts" class="absolute inset-0 w-full h-full object-cover z-10"></canvas>
+
+                        <!-- Hand Detection Badge -->
+                        <div id="hand-status-shortcuts"
+                            class="absolute top-4 right-4 px-3 py-1.5 rounded-lg bg-slate-900/80 backdrop-blur border border-slate-700 flex items-center gap-2 transition-all opacity-0 z-20">
+                            <div class="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></div>
+                            <span class="text-[10px] font-bold uppercase tracking-wider text-slate-300">Hand
+                                Detected</span>
+                        </div>
+
+                        <div class="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 transition-opacity pointer-events-none z-30"
                             id="countdown-overlay">
                             <span class="text-7xl font-black text-white" id="countdown-text">3</span>
                         </div>
@@ -268,7 +277,15 @@
                         class="flex-1 relative rounded-2xl overflow-hidden bg-black aspect-video border border-slate-700">
                         <video id="webcam-urls" class="absolute inset-0 w-full h-full object-cover" autoplay
                             playsinline></video>
-                        <canvas id="canvas-urls" class="absolute inset-0 w-full h-full object-cover"></canvas>
+                        <canvas id="canvas-urls" class="absolute inset-0 w-full h-full object-cover z-10"></canvas>
+
+                        <!-- Hand Detection Badge -->
+                        <div id="hand-status-urls"
+                            class="absolute top-4 right-4 px-3 py-1.5 rounded-lg bg-slate-900/80 backdrop-blur border border-slate-700 flex items-center gap-2 transition-all opacity-0 z-20">
+                            <div class="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse"></div>
+                            <span class="text-[10px] font-bold uppercase tracking-wider text-slate-300">Hand
+                                Detected</span>
+                        </div>
                     </div>
                 </div>
 

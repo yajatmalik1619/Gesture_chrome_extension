@@ -88,9 +88,17 @@ export class GestureRecorder {
         this.canvasCtx.save();
         this.canvasCtx.clearRect(0, 0, this.canvasElement.width, this.canvasElement.height);
 
-        if (this.results && this.results.landmarks) {
+        const handDetected = this.results && this.results.landmarks && this.results.landmarks.length > 0;
+
+        // Notify callback if exists
+        if (this.onResults) {
+            this.onResults(this.results);
+        }
+
+        if (handDetected) {
             if (this.isRecording && this.results.landmarks[0]) {
-                this.recordedFrames.push(this.results.landmarks[0]);
+                const landmarks = this.results.landmarks[0];
+                this.recordedFrames.push(landmarks);
             }
 
             for (const landmarks of this.results.landmarks) {
