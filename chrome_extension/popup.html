@@ -1,249 +1,1120 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>GestureSelect</title>
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --bg: #1a0f2e;
+      --surface: #251640;
+      --surface2: #2f1d52;
+      --border: #3d2870;
+      --accent: #7c3aed;
+      --accent2: #a855f7;
+      --accent-dim: rgba(124, 58, 237, 0.15);
+      --text: #e2d9f3;
+      --text-muted: #9d87c2;
+      --text-faint: #5e4d8a;
+      --green: #34d399;
+      --amber: #fbbf24;
+      --red: #f87171;
+    }
+
     body {
-      width: 320px;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: #0f172a;
-      color: #e2e8f0;
-      padding: 16px;
+      width: 557px;
+      min-height: 200px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      font-size: 13px;
+      line-height: 1.4;
     }
-    
-    header {
+
+    /* ── Tabs ── */
+    .tabs {
       display: flex;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: 16px;
-      padding-bottom: 12px;
-      border-bottom: 1px solid #334155;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
     }
-    
-    .logo {
-      font-size: 24px;
-    }
-    
-    h1 {
-      font-size: 18px;
+
+    .tab {
+      flex: 1;
+      padding: 10px 6px;
+      font-size: 11px;
       font-weight: 600;
+      color: var(--text-muted);
+      cursor: pointer;
+      border: none;
+      background: transparent;
+      border-bottom: 2px solid transparent;
+      transition: all 0.15s;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
     }
-    
-    .status-card {
-      background: #1e293b;
+
+    .tab.active {
+      color: var(--accent2);
+      border-bottom-color: var(--accent2);
+    }
+
+    .tab:hover:not(.active) {
+      color: var(--text);
+      background: var(--accent-dim);
+    }
+
+    .panel {
+      display: none;
+      padding: 12px;
+      max-height: 640px;
+      overflow-y: auto;
+    }
+
+    .panel.active {
+      display: block;
+    }
+
+    /* ── Common ── */
+    .dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .dot.connected {
+      background: var(--green);
+    }
+
+    .dot.connecting {
+      background: var(--amber);
+      animation: blink 1.2s infinite;
+    }
+
+    .dot.disconnected {
+      background: var(--red);
+    }
+
+    @keyframes blink {
+
+      0%,
+      100% {
+        opacity: 1
+      }
+
+      50% {
+        opacity: 0.3
+      }
+    }
+
+    .btn {
+      padding: 7px 12px;
+      border: none;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #fff;
+    }
+
+    .btn-primary:hover {
+      background: #6d28d9;
+    }
+
+    .btn-primary:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    .btn-ghost {
+      background: var(--surface2);
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+    }
+
+    .btn-ghost:hover {
+      color: var(--text);
+      background: var(--border);
+    }
+
+    .btn-danger {
+      background: rgba(248, 113, 113, 0.1);
+      color: var(--red);
+      border: 1px solid rgba(248, 113, 113, 0.25);
+    }
+
+    .btn-danger:hover {
+      background: rgba(248, 113, 113, 0.22);
+    }
+
+    .btn-success {
+      background: rgba(52, 211, 153, 0.12);
+      color: var(--green);
+      border: 1px solid rgba(52, 211, 153, 0.3);
+    }
+
+    .btn-sm {
+      padding: 4px 9px;
+      font-size: 11px;
+      border-radius: 5px;
+    }
+
+    .btn-full {
+      width: 100%;
+      justify-content: center;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
       border-radius: 8px;
       padding: 12px;
-      margin-bottom: 12px;
-      border: 1px solid #334155;
+      margin-bottom: 10px;
     }
-    
-    .status-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 6px 0;
+
+    .card-label {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-faint);
+      margin-bottom: 8px;
+      font-weight: 600;
     }
-    
-    .status-label {
-      font-size: 13px;
-      color: #94a3b8;
+
+    .section-title {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      padding: 4px 0 8px;
     }
-    
-    .status-value {
-      font-size: 13px;
+
+    .form-group {
+      margin-bottom: 9px;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-bottom: 4px;
       font-weight: 500;
     }
-    
-    .status-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      display: inline-block;
-      margin-right: 6px;
+
+    .form-input,
+    .form-select {
+      width: 100%;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      color: var(--text);
+      padding: 6px 9px;
+      font-size: 12px;
+      font-family: inherit;
+      outline: none;
+      transition: border-color 0.15s;
     }
-    
-    .status-dot.connected { background: #10b981; }
-    .status-dot.connecting { background: #f59e0b; animation: pulse 1.5s infinite; }
-    .status-dot.disconnected { background: #ef4444; }
-    
-    @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.5; }
+
+    .form-input:focus,
+    .form-select:focus {
+      border-color: var(--accent);
     }
-    
-    .gesture-display {
-      background: #1e293b;
-      border-radius: 8px;
-      padding: 12px;
-      margin-bottom: 12px;
-      border: 1px solid #334155;
-      text-align: center;
+
+    .form-select option {
+      background: var(--surface2);
     }
-    
-    .gesture-label {
-      font-size: 11px;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      color: #64748b;
-      margin-bottom: 6px;
-    }
-    
-    .gesture-name {
-      font-size: 20px;
-      font-weight: 600;
-      color: #fbbf24;
-      margin-bottom: 4px;
-    }
-    
-    .gesture-action {
-      font-size: 13px;
-      color: #94a3b8;
-    }
-    
-    .gesture-hand {
-      display: inline-block;
-      font-size: 11px;
-      background: #334155;
-      padding: 2px 8px;
-      border-radius: 4px;
-      margin-top: 6px;
-      color: #cbd5e1;
-    }
-    
-    .stats-grid {
+
+    .form-row {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 8px;
-      margin-bottom: 12px;
     }
-    
-    .stat-box {
-      background: #1e293b;
-      border-radius: 6px;
-      padding: 10px;
+
+    .divider {
+      height: 1px;
+      background: var(--border);
+      margin: 12px 0;
+    }
+
+    .hint {
+      font-size: 11px;
+      color: var(--text-faint);
+      margin-top: 3px;
+    }
+
+    .empty-state {
       text-align: center;
-      border: 1px solid #334155;
+      padding: 20px 16px;
+      color: var(--text-faint);
+      font-size: 12px;
     }
-    
-    .stat-value {
-      font-size: 20px;
-      font-weight: 700;
-      color: #3b82f6;
+
+    .empty-icon {
+      font-size: 22px;
+      margin-bottom: 6px;
+    }
+
+    .alert {
+      background: rgba(248, 113, 113, 0.1);
+      border: 1px solid rgba(248, 113, 113, 0.3);
+      border-radius: 6px;
+      padding: 8px 12px;
+      margin-bottom: 10px;
+      font-size: 12px;
+      color: #fca5a5;
+      display: none;
+    }
+
+    .alert-title {
+      font-weight: 600;
       margin-bottom: 2px;
+      color: var(--red);
     }
-    
+
+    .toggle-group {
+      display: flex;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      overflow: hidden;
+    }
+
+    .toggle-btn {
+      flex: 1;
+      padding: 6px;
+      font-size: 12px;
+      font-weight: 500;
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .toggle-btn.active {
+      background: var(--accent);
+      color: #fff;
+    }
+
+    /* ── Status Tab ── */
+    .status-pill {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 6px 12px;
+      margin-bottom: 10px;
+    }
+
+    .status-text {
+      font-size: 12px;
+      color: var(--text-muted);
+      flex: 1;
+    }
+
+    .status-text .val {
+      color: var(--text);
+      font-weight: 500;
+    }
+
+    .stats-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .stat {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 10px 8px;
+      text-align: center;
+    }
+
+    .stat-num {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--accent2);
+    }
+
     .stat-label {
       font-size: 10px;
-      color: #64748b;
+      color: var(--text-faint);
       text-transform: uppercase;
-      letter-spacing: 0.05em;
+      letter-spacing: 0.06em;
+      margin-top: 2px;
     }
-    
-    button {
-      width: 100%;
-      padding: 10px;
-      background: #3b82f6;
-      color: white;
-      border: none;
-      border-radius: 6px;
-      font-size: 13px;
+
+    .gesture-card {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .gesture-name {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--accent2);
+    }
+
+    .gesture-action {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .gesture-hand-badge {
+      background: var(--accent-dim);
+      border: 1px solid var(--border);
+      color: var(--accent2);
+      font-size: 11px;
+      padding: 3px 8px;
+      border-radius: 4px;
       font-weight: 500;
+    }
+
+    /* ── Gesture Binding Rows ── */
+    .gesture-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .gesture-row:last-child {
+      border-bottom: none;
+    }
+
+    .gesture-row-id {
+      flex: 0 0 auto;
+      min-width: 0;
+    }
+
+    .gesture-id-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text);
+      white-space: nowrap;
+    }
+
+    .gesture-type-badge {
+      font-size: 9px;
+      padding: 1px 5px;
+      border-radius: 3px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-top: 2px;
+      display: inline-block;
+    }
+
+    .badge-static {
+      background: rgba(124, 58, 237, 0.2);
+      color: var(--accent2);
+    }
+
+    .badge-dynamic {
+      background: rgba(251, 191, 36, 0.15);
+      color: var(--amber);
+    }
+
+    .badge-builtin {
+      background: rgba(52, 211, 153, 0.12);
+      color: var(--green);
+    }
+
+    .binding-select {
+      flex: 1;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      color: var(--text);
+      padding: 5px 7px;
+      font-size: 11px;
+      font-family: inherit;
+      outline: none;
+      min-width: 0;
+      transition: border-color 0.15s;
+    }
+
+    .binding-select:focus {
+      border-color: var(--accent);
+    }
+
+    .binding-select option {
+      background: var(--surface2);
+    }
+
+    .save-binding-btn {
+      flex-shrink: 0;
+      opacity: 0;
+      transition: opacity 0.2s;
+      pointer-events: none;
+    }
+
+    .save-binding-btn.dirty {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .del-gesture-btn {
+      flex-shrink: 0;
+    }
+
+    /* ── Confirm delete inline ── */
+    .confirm-row {
+      display: none;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 8px;
+      background: rgba(248, 113, 113, 0.08);
+      border-radius: 5px;
+      margin-top: 4px;
+      font-size: 11px;
+      color: #fca5a5;
+    }
+
+    .confirm-row.visible {
+      display: flex;
+    }
+
+    /* ── Record Tab ── */
+    .record-active-panel {
+      background: var(--surface2);
+      border: 1px solid var(--accent);
+      border-radius: 8px;
+      padding: 14px;
+      margin-bottom: 10px;
+      display: none;
+    }
+
+    .record-active-panel.on {
+      display: block;
+    }
+
+    .record-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--accent2);
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .record-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--red);
+      animation: blink 0.8s infinite;
+    }
+
+    .progress-bar {
+      height: 4px;
+      background: var(--border);
+      border-radius: 2px;
+      overflow: hidden;
+      margin-bottom: 6px;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: var(--accent2);
+      border-radius: 2px;
+      transition: width 0.3s ease;
+      width: 0%;
+    }
+
+    .record-msg {
+      font-size: 13px;
+      color: var(--text);
+      text-align: center;
+      padding: 7px;
+      background: var(--accent-dim);
+      border-radius: 5px;
+      margin-bottom: 8px;
+    }
+
+    .rec-status {
+      display: none;
+      border-radius: 6px;
+      padding: 7px 10px;
+      font-size: 12px;
+      margin-bottom: 8px;
+    }
+
+    /* ── Footer ── */
+    .footer {
+      padding: 7px 14px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .footer-text {
+      font-size: 11px;
+      color: var(--text-faint);
+    }
+
+    /* ── Toggle Switch ── */
+    .toggle-switch {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .switch {
+      position: relative;
+      width: 42px;
+      height: 24px;
+      flex-shrink: 0;
+    }
+
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .slider {
+      position: absolute;
+      inset: 0;
+      background: var(--border);
+      border-radius: 12px;
       cursor: pointer;
       transition: background 0.2s;
     }
-    
-    button:hover {
-      background: #2563eb;
+
+    .slider:before {
+      content: '';
+      position: absolute;
+      width: 18px;
+      height: 18px;
+      left: 3px;
+      top: 3px;
+      background: #fff;
+      border-radius: 50%;
+      transition: transform 0.2s;
     }
-    
-    button:disabled {
-      background: #334155;
-      cursor: not-allowed;
-      opacity: 0.6;
+
+    input:checked+.slider {
+      background: var(--accent);
     }
-    
-    .warning {
-      background: #fef3c7;
-      color: #92400e;
-      padding: 10px;
-      border-radius: 6px;
+
+    input:checked+.slider:before {
+      transform: translateX(18px);
+    }
+
+    .toggle-label {
       font-size: 12px;
-      margin-bottom: 12px;
-      border: 1px solid #fde047;
+      font-weight: 600;
+      color: var(--text-muted);
     }
-    
-    .warning strong {
+
+    .toggle-label.on {
+      color: var(--green);
+    }
+
+    /* ── Pipeline power row ── */
+    .power-row {
+      display: flex;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .power-row .btn {
+      flex: 1;
+      justify-content: center;
+    }
+
+    .btn-start {
+      background: rgba(52, 211, 153, 0.12);
+      color: var(--green);
+      border: 1px solid rgba(52, 211, 153, 0.3);
+    }
+
+    .btn-start:hover {
+      background: rgba(52, 211, 153, 0.22);
+    }
+
+    .btn-stop {
+      background: rgba(248, 113, 113, 0.1);
+      color: var(--red);
+      border: 1px solid rgba(248, 113, 113, 0.25);
+    }
+
+    .btn-stop:hover {
+      background: rgba(248, 113, 113, 0.22);
+    }
+
+    #toast {
+      position: fixed;
+      bottom: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #1e1e2e;
+      border: 1px solid var(--accent);
+      border-radius: 6px;
+      padding: 7px 16px;
+      font-size: 12px;
+      color: var(--text);
+      display: none;
+      z-index: 999;
+      white-space: nowrap;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+    }
+
+    /* ── Camera Tab ── */
+    #tab-camera {
+      padding: 8px;
+    }
+
+    .cam-container {
+      position: relative;
+      background: #000;
+      border-radius: 8px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      /* matches camera native ratio — no fixed height needed */
+    }
+
+    /* MJPEG stream from Python */
+    .cam-container #cam-feed {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      /* full frame visible, same ratio → no letterbox */
       display: block;
-      margin-bottom: 4px;
+      border-radius: 7px;
     }
-    
-    footer {
-      margin-top: 12px;
-      padding-top: 12px;
-      border-top: 1px solid #334155;
-      text-align: center;
-      font-size: 11px;
-      color: #64748b;
+
+    /* Local getUserMedia feed */
+    .cam-container #cam-local {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      display: block;
+      transform: scaleX(-1);
+      /* mirror effect */
+      border-radius: 7px;
+      background: #000;
+    }
+
+    .cam-overlay {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: 6px 10px;
+      background: linear-gradient(transparent, rgba(0, 0, 0, 0.7));
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .cam-badge {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--green);
+      background: rgba(0, 0, 0, 0.5);
+      padding: 2px 7px;
+      border-radius: 3px;
+      border: 1px solid rgba(52, 211, 153, 0.4);
+    }
+
+    .cam-gesture {
+      font-size: 13px;
+      color: #fff;
+    }
+
+    .cam-offline {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 285px;
+      gap: 8px;
+      background: var(--surface);
+      border-radius: 8px;
+      border: 1px solid var(--border);
+    }
+
+    .cam-offline-icon {
+      font-size: 28px;
+    }
+
+    .cam-offline-text {
+      font-size: 12px;
+      color: var(--text-faint);
     }
   </style>
 </head>
+
 <body>
-  <header>
-    <div class="logo">✋</div>
-    <h1>GestureSelect</h1>
-  </header>
-  
-  <div id="warning" class="warning" style="display: none;">
-    <strong>⚠️ Pipeline Not Running</strong>
-    Start the Python pipeline: <code>python main.py</code>
+
+  <div class="tabs">
+    <button class="tab active" data-tab="status">Status</button>
+    <button class="tab" data-tab="gestures">Gestures</button>
+    <button class="tab" data-tab="record">Record</button>
+    <button class="tab" data-tab="camera">&#9654; Cam</button>
   </div>
-  
-  <div class="status-card">
-    <div class="status-row">
-      <div class="status-label">Connection</div>
-      <div class="status-value">
-        <span class="status-dot" id="status-dot"></span>
-        <span id="connection-status">—</span>
+
+  <!-- ═══ STATUS TAB ═══════════════════════════════════════════════════════════ -->
+  <div class="panel active" id="tab-status">
+    <div id='alert' class='alert'>
+      <div class='alert-title'>Pipeline not running</div>
+      Click <strong>▶ Start Pipeline</strong> below, or start <code
+        style="font-size:11px;color:#fca5a5;">watchdog.py</code>.
+    </div>
+
+    <!-- Gesture Actions master toggle -->
+    <div
+      style="display:flex;align-items:center;justify-content:space-between;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:10px 14px;margin-bottom:10px;">
+      <div>
+        <div style="font-size:12px;font-weight:600;color:var(--text);">Gesture Actions</div>
+        <div style="font-size:11px;color:var(--text-faint);margin-top:1px;" id="toggle-hint">Detecting gestures —
+          actions active</div>
+      </div>
+      <label class="switch" title="Enable / disable gesture actions">
+        <input type="checkbox" id="gestures-toggle" checked>
+        <span class="slider"></span>
+      </label>
+    </div>
+
+    <div class="status-pill">
+      <div class="dot disconnected" id="status-dot"></div>
+      <div class="status-text">
+        <span class="val" id="connection-status">Disconnected</span>
+        &nbsp;<span id="ws-url" style="font-size:11px;color:var(--text-faint);">ws://localhost:8765</span>
       </div>
     </div>
-    <div class="status-row">
-      <div class="status-label">WebSocket</div>
-      <div class="status-value" id="ws-url">—</div>
+
+    <div class="stats-row">
+      <div class="stat">
+        <div class="stat-num" id="stat-fps">--</div>
+        <div class="stat-label">FPS</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num" id="stat-messages">0</div>
+        <div class="stat-label">Events</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num" id="stat-commands">0</div>
+        <div class="stat-label">Actions</div>
+      </div>
     </div>
-    <div class="status-row">
-      <div class="status-label">FPS</div>
-      <div class="status-value" id="fps">—</div>
+
+    <div class="card" id="gesture-card" style="display:none;">
+      <div class="card-label">Last Gesture</div>
+      <div class="gesture-card">
+        <div>
+          <div class="gesture-name" id="gesture-name">--</div>
+          <div class="gesture-action" id="gesture-action">--</div>
+        </div>
+        <div class="gesture-hand-badge" id="gesture-hand">--</div>
+      </div>
+    </div>
+
+    <button class="btn btn-ghost btn-full" id="reconnect-btn">Reconnect</button>
+
+    <!-- Pipeline start / stop (requires watchdog.py running at boot) -->
+    <div class="power-row">
+      <button class="btn btn-sm btn-start" id="start-pipeline-btn">▶ Start Pipeline</button>
+      <button class="btn btn-sm btn-stop" id="stop-pipeline-btn">■ Stop Pipeline</button>
+    </div>
+
+  </div>
+  <!-- ═══ GESTURES TAB ══════════════════════════════════════════════════════════ -->
+  <div class="panel" id="tab-gestures">
+
+    <!-- Header row with Reset button -->
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+      <div class="section-title" style="padding:0;margin:0;">Gesture → Task Mappings</div>
+      <button class="btn btn-sm btn-ghost" id="reset-bindings-btn" title="Restore all default task assignments">↺
+        Reset</button>
+    </div>
+    <div class="hint" style="margin-bottom:8px;">Each gesture is detected by the camera. Choose which task it triggers.
+    </div>
+
+    <!-- Mapping table: Gesture | Type | Task -->
+    <div
+      style="background:var(--surface);border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-bottom:10px;">
+      <div
+        style="display:grid;grid-template-columns:1fr 60px 1fr 32px;gap:0;padding:6px 10px;border-bottom:1px solid var(--border);background:var(--surface2);">
+        <div
+          style="font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;">
+          Gesture</div>
+        <div
+          style="font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;">
+          Type</div>
+        <div
+          style="font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;">
+          Task</div>
+        <div></div>
+      </div>
+      <div id="mapping-table-body">
+        <div class="empty-state" style="padding:16px;">
+          <div class="empty-icon" style="font-size:18px;">⋯</div>
+          <div style="font-size:11px;">Loading gestures...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Available Tasks (collapsible reference) -->
+    <details style="margin-bottom:10px;">
+      <summary
+        style="font-size:11px;font-weight:600;color:var(--text-muted);cursor:pointer;padding:6px 10px;background:var(--surface);border:1px solid var(--border);border-radius:6px;list-style:none;">
+        ▸ Available Tasks <span id="tasks-count" style="color:var(--text-faint);font-weight:400;"></span>
+      </summary>
+      <div id="tasks-reference"
+        style="background:var(--surface);border:1px solid var(--border);border-top:none;border-radius:0 0 6px 6px;padding:6px 8px;max-height:140px;overflow-y:auto;">
+        <div class="empty-state" style="padding:8px;">Loading tasks...</div>
+      </div>
+    </details>
+
+    <div class="divider"></div>
+
+    <!-- Extension-side URL / Shortcut mappings (unchanged) -->
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+      <div class="section-title" style="padding:0;">URL / Shortcut Actions</div>
+      <button class="btn btn-sm btn-primary" id="add-mapping-btn">+ Add</button>
+    </div>
+
+    <div class="card" id="add-form" style="display:none;">
+      <div class="card-label">New URL / Shortcut Mapping</div>
+      <div class="form-group">
+        <label class="form-label">Gesture ID</label>
+        <input class="form-input" id="new-gesture-id" placeholder="e.g. my_custom_wave" />
+        <div class="hint">Must match a recorded gesture ID</div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Action Type</label>
+        <div class="toggle-group">
+          <button class="toggle-btn active" data-type="url">Open URL</button>
+          <button class="toggle-btn" data-type="shortcut">Shortcut</button>
+        </div>
+      </div>
+      <div id="url-fields">
+        <div class="form-group">
+          <label class="form-label">URL</label>
+          <input class="form-input" id="new-url" placeholder="https://..." />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Open in</label>
+          <select class="form-select" id="new-tab-mode">
+            <option value="same">Current tab</option>
+            <option value="new">New tab</option>
+          </select>
+        </div>
+      </div>
+      <div id="shortcut-fields" style="display:none;">
+        <div class="form-group">
+          <label class="form-label">Shortcut</label>
+          <input class="form-input" id="new-shortcut" placeholder="e.g. ctrl+shift+j" />
+          <div class="hint">Use: ctrl, shift, alt, cmd with +</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:4px;">
+        <button class="btn btn-ghost btn-sm" id="cancel-form-btn" style="flex:1;">Cancel</button>
+        <button class="btn btn-primary btn-sm" id="save-mapping-btn" style="flex:1;">Save</button>
+      </div>
+    </div>
+
+    <div id="ext-mapping-list">
+      <div class="empty-state" style="padding:12px 0 4px;"><span style="font-size:11px;">No URL/shortcut actions
+          yet.</span></div>
     </div>
   </div>
-  
-  <div class="gesture-display" id="gesture-display" style="display: none;">
-    <div class="gesture-label">Last Gesture</div>
-    <div class="gesture-name" id="gesture-name">—</div>
-    <div class="gesture-action" id="gesture-action">—</div>
-    <div class="gesture-hand" id="gesture-hand">—</div>
-  </div>
-  
-  <div class="stats-grid">
-    <div class="stat-box">
-      <div class="stat-value" id="stat-messages">0</div>
-      <div class="stat-label">Messages</div>
+
+  <!-- ═══ RECORD TAB ══════════════════════════════════════════════════════════ -->
+  <div class="panel" id="tab-record">
+
+    <!-- Active recording progress -->
+    <div class="record-active-panel" id="record-active">
+      <div class="record-title">
+        <div class="record-dot"></div>
+        Recording in progress
+      </div>
+      <div class="record-msg" id="record-message">Show your gesture to the camera</div>
+      <div class="progress-bar">
+        <div class="progress-fill" id="record-progress-bar"></div>
+      </div>
+      <div style="font-size:12px;color:var(--text-muted);margin-bottom:10px;" id="record-progress-text">0 / 6 samples
+      </div>
+      <button class="btn btn-danger btn-sm btn-full" id="cancel-record-btn">Cancel Recording</button>
     </div>
-    <div class="stat-box">
-      <div class="stat-value" id="stat-commands">0</div>
-      <div class="stat-label">Commands</div>
+
+    <!-- Record form -->
+    <div id="record-form">
+      <div class="card">
+        <div class="card-label">Capture New Gesture</div>
+        <div class="form-group">
+          <label class="form-label">Gesture ID</label>
+          <input class="form-input" id="rec-gesture-id" placeholder="my_gesture_id" />
+          <div class="hint">Lowercase, underscores only. Use this when mapping.</div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Display Label</label>
+          <input class="form-input" id="rec-label" placeholder="My Gesture" />
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Type</label>
+            <select class="form-select" id="rec-type">
+              <option value="static">Static (hold pose)</option>
+              <option value="dynamic">Dynamic (motion)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Hand</label>
+            <select class="form-select" id="rec-hand">
+              <option value="right">Right</option>
+              <option value="left">Left</option>
+            </select>
+          </div>
+        </div>
+        <div class="hint" style="margin-bottom:10px;" id="type-hint">Hold a fixed hand pose. 6 samples × 2 seconds
+          each.
+        </div>
+        <div class="rec-status" id="rec-status"></div>
+        <button class="btn btn-primary btn-full" id="start-record-btn">▶ Start Recording</button>
+      </div>
+
+      <!-- Saved custom gestures list for quick-delete -->
+      <div class="section-title" style="margin-top:4px;">Recorded Gestures</div>
+      <div class="card">
+        <div id="rec-custom-list">
+          <div class="empty-state">
+            <div class="empty-icon">🤚</div>No recorded gestures yet.
+          </div>
+        </div>
+      </div>
+
+      <!-- Built-in reference -->
+      <div class="divider"></div>
+      <div class="section-title">Built-in Gesture Reference</div>
+      <div class="card">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0;">
+          <div
+            style="font-size:11px;padding:4px 0;border-bottom:1px solid var(--border);color:var(--text-muted);font-weight:500;">
+            PALM</div>
+          <div style="font-size:11px;padding:4px 0;border-bottom:1px solid var(--border);color:var(--text-faint);">New
+            Tab</div>
+          <div
+            style="font-size:11px;padding:4px 0;border-bottom:1px solid var(--border);color:var(--text-muted);font-weight:500;">
+            FIST</div>
+          <div style="font-size:11px;padding:4px 0;border-bottom:1px solid var(--border);color:var(--text-faint);">
+            Close
+            Tab</div>
+          <div
+            style="font-size:11px;padding:4px 0;border-bottom:1px solid var(--border);color:var(--text-muted);font-weight:500;">
+            SWIPE_RIGHT</div>
+          <div style="font-size:11px;padding:4px 0;border-bottom:1px solid var(--border);color:var(--text-faint);">
+            Next
+            Tab</div>
+          <div
+            style="font-size:11px;padding:4px 0;border-bottom:1px solid var(--border);color:var(--text-muted);font-weight:500;">
+            SWIPE_LEFT</div>
+          <div style="font-size:11px;padding:4px 0;border-bottom:1px solid var(--border);color:var(--text-faint);">
+            Prev
+            Tab</div>
+          <div
+            style="font-size:11px;padding:4px 0;border-bottom:1px solid var(--border);color:var(--text-muted);font-weight:500;">
+            SWIPE_UP</div>
+          <div style="font-size:11px;padding:4px 0;border-bottom:1px solid var(--border);color:var(--text-faint);">
+            Minimize</div>
+          <div
+            style="font-size:11px;padding:4px 0;border-bottom:1px solid var(--border);color:var(--text-muted);font-weight:500;">
+            SWIPE_DOWN</div>
+          <div style="font-size:11px;padding:4px 0;border-bottom:1px solid var(--border);color:var(--text-faint);">
+            Maximize</div>
+          <div
+            style="font-size:11px;padding:4px 0;border-bottom:1px solid var(--border);color:var(--text-muted);font-weight:500;">
+            WAVE</div>
+          <div style="font-size:11px;padding:4px 0;border-bottom:1px solid var(--border);color:var(--text-faint);">
+            Refresh</div>
+          <div
+            style="font-size:11px;padding:4px 0;border-bottom:1px solid var(--border);color:var(--text-muted);font-weight:500;">
+            THUMBS_UP</div>
+          <div style="font-size:11px;padding:4px 0;border-bottom:1px solid var(--border);color:var(--text-faint);">
+            Fullscreen</div>
+          <div style="font-size:11px;padding:4px 0;color:var(--text-muted);font-weight:500;">PEACE</div>
+          <div style="font-size:11px;padding:4px 0;color:var(--text-faint);">Go Back</div>
+          <div style="font-size:11px;padding:4px 0;color:var(--text-muted);font-weight:500;">INDEX_ONLY</div>
+          <div style="font-size:11px;padding:4px 0;color:var(--text-faint);">Scroll Up</div>
+        </div>
+      </div>
     </div>
   </div>
-  
-  <button id="reconnect-btn">Reconnect</button>
-  
-  <footer>
-    Press keyboard shortcuts or use gestures
-  </footer>
-  
+
+  <!-- ═══ CAMERA TAB ══════════════════════════════════════════════════════════ -->
+  <div class="panel" id="tab-camera">
+    <!-- Mode badge -->
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+      <div class="section-title" style="padding:0;margin:0;">Camera Feed</div>
+      <span id="cam-mode-label"
+        style="font-size:10px;padding:2px 8px;border-radius:3px;background:var(--surface);border:1px solid var(--border);color:var(--text-faint);">--</span>
+    </div>
+
+    <div class="cam-container" id="cam-container">
+      <!-- MJPEG annotated stream from Python -->
+      <img id="cam-feed" alt="Pipeline stream" style="display:none;" />
+
+      <!-- Local getUserMedia stream -->
+      <video id="cam-local" autoplay playsinline muted style="display:none;"></video>
+
+      <!-- Overlay for gesture display -->
+      <div class="cam-overlay" id="cam-overlay" style="display:none;">
+        <span class="cam-badge">● LIVE</span>
+        <span class="cam-gesture" id="cam-last-gesture"></span>
+      </div>
+
+      <!-- Offline fallback -->
+      <div class="cam-offline" id="cam-offline">
+        <div class="cam-offline-icon">📷</div>
+        <div class="cam-offline-text">Camera unavailable</div>
+        <button class="btn btn-sm btn-start" id="cam-start-btn" style="margin-top:4px;">▶ Start Pipeline</button>
+      </div>
+    </div>
+
+    <div style="font-size:11px;color:var(--text-faint);text-align:center;margin-top:6px;">
+      <span id="cam-fps-label">-- FPS</span> &nbsp;·&nbsp; <span id="cam-client-label"></span>
+    </div>
+  </div>
+
+  <div class="footer">
+    <div class="footer-text">GestureSelect</div>
+    <div class="footer-text" id="footer-status">--</div>
+  </div>
+
+  <div id="toast"></div>
+
+  <script src="options.js"></script>
   <script src="popup.js"></script>
 </body>
+
 </html>

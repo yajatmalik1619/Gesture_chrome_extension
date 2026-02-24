@@ -1,10 +1,10 @@
 """
 main.py
-───────
+at this point in time we need to run both main and the extension manually together.
 Entry point for the GestureSelect Python pipeline.
 
 Wires together:
-  ConfigManager → GestureDetector → GestureRouter → ActionExecutor → WebSocketServer
+  ConfigManager GestureDetector GestureRouter ActionExecutor WebSocketServer
   + DTWMatcher (custom gestures)
   + Recorder   (custom gesture recording sessions)
 
@@ -14,12 +14,13 @@ Run:
     python main.py --no-preview       # headless mode (no cv2 window)
     python main.py --debug            # verbose logging
 
+    
 The pipeline loop:
   1. Read frame from webcam
-  2. GestureDetector processes landmarks → FrameResult
+  2. GestureDetector processes landmarks FrameResult
   3. Recorder intercepts frame if a session is active
-  4. GestureRouter maps FrameResult → ActionEvents
-  5. ActionExecutor translates ActionEvents → browser commands
+  4. GestureRouter maps FrameResult ActionEvents
+  5. ActionExecutor translates ActionEvents browser commands
   6. WebSocketServer broadcasts events + execution results to extension
   7. Display annotated preview (unless --no-preview)
 """
@@ -29,19 +30,23 @@ import asyncio
 import json
 import logging
 import sys
+import threading
 import time
+from http.server import BaseHTTPRequestHandler, HTTPServer
 
 import cv2
 
 from pipeline.config_manager import ConfigManager
-from pipeline.gesture_detector_fixed import GestureDetector
+from pipeline.mediapipe_detection import GestureDetector
 from pipeline.gesture_router import GestureRouter
 from pipeline.dtw_matcher import DTWMatcher
+from pipeline.task_mapper import GestureTaskMapper
 from pipeline.websocket_server import WebSocketServer
 from pipeline.recorder import Recorder
+from pipeline.mjpeg_server import MJPEGServer
 from Mapping.action_executor_v2 import ActionExecutor
 
-# ── Logging ───────────────────────────────────────────────────────────────────
+# Logging
 
 def setup_logging(debug: bool = False):
     level = logging.DEBUG if debug else logging.INFO
@@ -52,13 +57,12 @@ def setup_logging(debug: bool = False):
         handlers=[logging.StreamHandler(sys.stdout)]
     )
 
-
-# ── CLI ───────────────────────────────────────────────────────────────────────
+#cli
 
 def parse_args():
     p = argparse.ArgumentParser(description="GestureSelect Pipeline")
-    p.add_argument("--config",     default="gestures_config.json",
-                   help="Path to gestures_config.json")
+    p.add_argument("--config",     default="gestures_config_v2.json",
+                   help="Path to gestures_config_v2.json")
     p.add_argument("--no-preview", action="store_true",
                    help="Disable OpenCV window (headless mode)")
     p.add_argument("--debug",      action="store_true",
@@ -66,29 +70,43 @@ def parse_args():
     return p.parse_args()
 
 
-# ── Main Pipeline Loop ────────────────────────────────────────────────────────
+#Main Pipeline Loop
 
 def run(args):
+    global _pipeline_running
     logger = logging.getLogger("main")
-    logger.info("Starting GestureSelect pipeline…")
+    logger.info("Starting GestureSelect pipeline...")
 
-    # ── Boot components ───────────────────────────────────────────────────────
+    # Boot components — ordered by dependency
     cfg      = ConfigManager(args.config)
-    cfg.start_watching()                  # live-reload on UI config changes
+    cfg.start_watching()          # live-reload on UI config changes
+
+    # GestureTaskMapper owns all gesture->task binding logic
+    # Nothing else should call cfg.get_binding() directly
+    mapper   = GestureTaskMapper(cfg)
 
     dtw      = DTWMatcher(cfg)
     detector = GestureDetector(cfg)
-    router   = GestureRouter(cfg, dtw)
-    executor = ActionExecutor(cfg)        # NEW: translates actions → commands
+    router   = GestureRouter(cfg, dtw, mapper=mapper)  # mapper is the binding authority
+    executor = ActionExecutor(cfg)                      # translates task_ids -> OS commands
     recorder = Recorder(cfg, dtw)
     server   = WebSocketServer(cfg)
     server.start()
 
-    # Attach a recorder reference to the server so inbound WS messages can
-    # trigger recording sessions from the UI
-    _attach_recorder_commands(server, recorder, cfg)
+    # MJPEG video stream for the extension popup camera feed
+    mjpeg = MJPEGServer(port=8767)
+    mjpeg.start()
 
-    # ── Camera setup ──────────────────────────────────────────────────────────
+    # Start HTTP control server (allows extension to check status)
+    _stop_signal.clear()
+    start_control_server(_stop_signal)
+    _pipeline_running = True
+
+    # Attach recording + binding command handlers to the WebSocket server
+    # The mapper is passed so UPDATE_BINDING goes through GestureTaskMapper
+    _attach_recorder_commands(server, recorder, cfg, mapper)
+
+    #  Camera setup 
     s = cfg.settings
     cam = cv2.VideoCapture(s.get("camera_index", 0))
     cam.set(cv2.CAP_PROP_FRAME_WIDTH,  s.get("camera_width",  1280))
@@ -105,15 +123,27 @@ def run(args):
     logger.info(f"WebSocket: ws://{cfg.ws_host}:{cfg.ws_port}")
     logger.info("Pipeline running. Press 'q' to quit.")
 
-    # ── Main loop ─────────────────────────────────────────────────────────────
+    # ── Main loop ──
     fps_times: list[float] = []
+    zero_clients_start_time: float | None = None
+
     try:
-        while True:
+        while not _stop_signal.is_set():
             ret, frame = cam.read()
             if not ret:
                 logger.warning("Frame capture failed — retrying.")
                 time.sleep(0.05)
                 continue
+
+            # Auto-shutdown if Chrome is closed (0 clients for 5 seconds)
+            if server.client_count == 0:
+                if zero_clients_start_time is None:
+                    zero_clients_start_time = time.time()
+                elif time.time() - zero_clients_start_time > 5.0:
+                    logger.info("No clients connected for 5 seconds. Shutting down pipeline.")
+                    break
+            else:
+                zero_clients_start_time = None
 
             # 1. Detect gestures
             annotated, frame_result = detector.process_frame(frame)
@@ -125,7 +155,7 @@ def run(args):
                     # Forward recording progress to the extension UI
                     _broadcast_recording_event(server, rec_event)
 
-            # 3. Route gestures → ActionEvents
+            # 3. Route gestures  ActionEvents
             events = router.route(frame_result)
 
             # 4. Execute actions and broadcast results
@@ -136,9 +166,9 @@ def run(args):
                 # Log execution
                 cmd_str = result.command or 'N/A'
                 logger.info(
-                    f"→ {event.action_id:25s}  gesture={event.gesture_id:15s} "
+                    f"[ACT] {event.action_id:25s}  gesture={event.gesture_id:15s} "
                     f"hand={event.hand:6s}  cmd={cmd_str:20s}  "
-                    f"success={result.success}  clients={server.client_count}"
+                    f"ok={result.success}  clients={server.client_count}"
                 )
                 
                 # Broadcast ActionEvent (gesture detection info)
@@ -156,7 +186,7 @@ def run(args):
             status = "running" if frame_result.hands else "no_hands"
             server.broadcast_status(status)
 
-            # 6. FPS overlay
+            # 6. FPS overlay + push to MJPEG stream
             now = time.time()
             fps_times.append(now)
             fps_times = [t for t in fps_times if now - t < 1.0]
@@ -166,6 +196,9 @@ def run(args):
             cv2.putText(annotated, f"WS clients: {server.client_count}",
                         (10, annotated.shape[0] - 35),
                         cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1)
+
+            # Push annotated frame to MJPEG stream (always, even in no-preview mode)
+            mjpeg.push_frame(annotated)
 
             # 7. Preview window
             if not args.no_preview:
@@ -191,25 +224,25 @@ def run(args):
         cam.release()
         cv2.destroyAllWindows()
         detector.close()
+        mjpeg.stop()
         server.stop()
+        _pipeline_running = False
         logger.info("Pipeline shut down cleanly.")
 
 
-# ── Recorder ↔ WebSocket Bridge ───────────────────────────────────────────────
+#  WebSocket Bridge 
 
 def _attach_recorder_commands(
     server: WebSocketServer,
     recorder: Recorder,
-    cfg: ConfigManager
+    cfg: ConfigManager,
+    mapper=None,            # GestureTaskMapper — owns binding logic
 ):
     """
-    Monkey-patch the server's inbound handler to also handle
-    recording session commands sent from the extension UI.
+    Patch the server's inbound handler to handle UI commands:
 
-    New inbound message types:
-      { "type": "START_RECORDING", "gesture_id": "...", "label": "...",
-        "gesture_type": "static"|"dynamic", "hand": "right"|"left" }
-      { "type": "CANCEL_RECORDING" }
+      Recording:  START_RECORDING | CANCEL_RECORDING
+      Mapping:    UPDATE_BINDING  | DELETE_CUSTOM_GESTURE | RESET_BINDINGS
     """
     original_handler = server._handle_inbound
 
@@ -222,9 +255,9 @@ def _attach_recorder_commands(
 
         if msg.get("type") == "START_RECORDING":
             recorder.start_session(
-                gesture_id   = msg.get("gesture_id", f"custom_{int(time.time())}"),
-                label        = msg.get("label", "Custom Gesture"),
-                gesture_type = msg.get("gesture_type", "static"),
+                gesture_id     = msg.get("gesture_id", f"custom_{int(time.time())}"),
+                label          = msg.get("label", "Custom Gesture"),
+                gesture_type   = msg.get("gesture_type", "static"),
                 preferred_hand = msg.get("hand", "Right").capitalize()
             )
             await ws.send(json.dumps({
@@ -232,10 +265,51 @@ def _attach_recorder_commands(
                 "recording_started": True,
                 "gesture_id": msg.get("gesture_id")
             }))
+
         elif msg.get("type") == "CANCEL_RECORDING":
             event = recorder.cancel()
             if event:
                 _broadcast_recording_event(server, event)
+
+        elif msg.get("type") == "UPDATE_BINDING":
+            # Delegate entirely to GestureTaskMapper — it owns binding logic
+            gesture_id = msg.get("gesture_id", "")
+            task_id    = msg.get("action_id",  "none")
+            if gesture_id:
+                if mapper:
+                    mapper.update(gesture_id, task_id)  # validates + persists
+                else:
+                    cfg.set_binding(gesture_id, task_id)  # fallback
+                logger.info(f"[Mapper] Binding updated: {gesture_id} -> {task_id}")
+                await ws.send(json.dumps({
+                    "type": "ACK", "binding_updated": True,
+                    "gesture_id": gesture_id, "action_id": task_id
+                }))
+
+        elif msg.get("type") == "DELETE_CUSTOM_GESTURE":
+            gesture_id = msg.get("gesture_id", "")
+            if gesture_id:
+                cfg.delete_custom_gesture(gesture_id)
+                logger.info(f"[Mapper] Custom gesture deleted: {gesture_id}")
+                await ws.send(json.dumps({
+                    "type": "ACK", "gesture_deleted": True,
+                    "gesture_id": gesture_id
+                }))
+
+        elif msg.get("type") == "RESET_BINDINGS":
+            # Delegate to GestureTaskMapper — DEFAULT_BINDINGS lives there
+            if mapper:
+                mapper.reset_defaults()
+            else:
+                # Fallback: use DEFAULT_BINDINGS from GestureTaskMapper class
+                from pipeline.task_mapper import GestureTaskMapper as _GM
+                with cfg._lock:
+                    for gid, tid in _GM.DEFAULT_BINDINGS.items():
+                        cfg._config.setdefault("bindings", {})[gid] = tid
+                cfg.save()
+            logger.info("[Mapper] All built-in bindings reset to factory defaults")
+            await ws.send(json.dumps({"type": "ACK", "bindings_reset": True}))
+
         else:
             await original_handler(ws, raw)
 
@@ -251,7 +325,76 @@ def _broadcast_recording_event(server: WebSocketServer, event):
         )
 
 
-# ── Entry Point ───────────────────────────────────────────────────────────────
+# Entry Point 
+
+#  HTTP Control Server
+
+_pipeline_running = False
+_stop_signal = threading.Event()
+
+
+def make_control_handler(stop_event: threading.Event):
+    """Returns an HTTP handler that can signal the pipeline to stop."""
+
+    class ControlHandler(BaseHTTPRequestHandler):
+        def log_message(self, fmt, *args):
+            pass  # silence access logs
+
+        def _cors(self):
+            self.send_header("Access-Control-Allow-Origin", "*")
+            self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+            self.send_header("Access-Control-Allow-Headers", "Content-Type")
+
+        def do_OPTIONS(self):
+            self.send_response(200)
+            self._cors()
+            self.end_headers()
+
+        def do_GET(self):
+            if self.path == "/status":
+                body = json.dumps({
+                    "running": _pipeline_running,
+                    "ws_port": 8765
+                }).encode()
+                self.send_response(200)
+                self.send_header("Content-Type", "application/json")
+                self._cors()
+                self.end_headers()
+                self.wfile.write(body)
+            else:
+                self.send_response(404)
+                self.end_headers()
+
+        def do_POST(self):
+            if self.path == "/stop":
+                stop_event.set()
+                body = json.dumps({"ok": True, "message": "Pipeline stopping"}).encode()
+                self.send_response(200)
+                self.send_header("Content-Type", "application/json")
+                self._cors()
+                self.end_headers()
+                self.wfile.write(body)
+            else:
+                self.send_response(404)
+                self.end_headers()
+
+    return ControlHandler
+
+
+def start_control_server(stop_event: threading.Event, port: int = 8766):
+    """Start the HTTP control server in a daemon thread."""
+    handler = make_control_handler(stop_event)
+    try:
+        httpd = HTTPServer(("localhost", port), handler)
+        t = threading.Thread(target=httpd.serve_forever, daemon=True)
+        t.start()
+        logger = logging.getLogger("control_server")
+        logger.info(f"Control server: http://localhost:{port}")
+        return httpd
+    except OSError as e:
+        logging.getLogger("control_server").warning(f"Control server failed to start: {e}")
+        return None
+
 
 if __name__ == "__main__":
     args = parse_args()
